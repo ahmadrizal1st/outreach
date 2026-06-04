@@ -298,30 +298,30 @@ DATABASE_URL=sqlite:///./data/client_finder.db
 ### Checklist Phase 1
 
 **Setup Project**
-- [ ] Buat struktur folder
-- [ ] Init virtual environment
-- [ ] Install requirements.txt
-- [ ] Setup .env dari .env.example
-- [ ] Setup .gitignore
+- [x] Buat struktur folder
+- [x] Init virtual environment
+- [x] Install requirements.txt
+- [x] Setup .env dari .env.example
+- [x] Setup .gitignore
 
 **Database**
-- [ ] Setup SQLAlchemy connection
-- [ ] Buat semua 9 tabel
-- [ ] Test koneksi database
-- [ ] Seed data dummy untuk testing
+- [x] Setup SQLAlchemy connection
+- [x] Buat semua 9 tabel
+- [x] Test koneksi database
+- [x] Seed data dummy untuk testing
 
 **FastAPI**
-- [ ] Setup main.py entry point
-- [ ] Setup router dasar
-- [ ] Setup Jinja2 template engine
-- [ ] Setup static files
+- [x] Setup main.py entry point
+- [x] Setup router dasar
+- [x] Setup Jinja2 template engine
+- [x] Setup static files
 
 **Frontend**
-- [ ] Setup Tailwind via CDN
-- [ ] Setup HTMX via CDN
-- [ ] Buat base.html template
-- [ ] Buat halaman dashboard kosong
-- [ ] Buat halaman settings kosong
+- [x] Setup Tailwind via CDN
+- [x] Setup HTMX via CDN
+- [x] Buat base.html template
+- [x] Buat halaman dashboard kosong
+- [x] Buat halaman settings kosong
 
 **Testing**
 - [ ] Jalankan server: `uvicorn main:app --reload`

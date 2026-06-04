@@ -528,27 +528,27 @@ async def save_config(config: ScraperConfigSchema):
 ### Checklist Phase 2
 
 **Setup**
-- [ ] Install Playwright: `playwright install chromium`
-- [ ] Buat folder `app/scraper/`
-- [ ] Buat semua file scraper
+- [x] Install Playwright: `playwright install chromium`
+- [x] Buat folder `app/scraper/`
+- [x] Buat semua file scraper
 
 **Core Logic**
-- [ ] `rate_limiter.py` — delay & anti-ban
-- [ ] `normalizer.py` — normalisasi data
-- [ ] `deduplicator.py` — cek duplikat
-- [ ] `detail_parser.py` — ekstrak field
-- [ ] `maps_scraper.py` — core scraping
-- [ ] `runner.py` — orkestrasi
+- [x] `rate_limiter.py` — delay & anti-ban
+- [x] `normalizer.py` — normalisasi data
+- [x] `deduplicator.py` — cek duplikat
+- [x] `detail_parser.py` — ekstrak field
+- [x] `maps_scraper.py` — core scraping
+- [x] `runner.py` — orkestrasi
 
 **Database**
-- [ ] Tambah tabel `scraper_progress`
-- [ ] Test insert data ke tabel `prospects`
+- [x] Tambah tabel `scraper_progress`
+- [x] Test insert data ke tabel `prospects`
 
 **API & Dashboard**
-- [ ] Endpoint run scraper
-- [ ] Endpoint status scraper
-- [ ] Endpoint config scraper
-- [ ] UI config & status di dashboard
+- [x] Endpoint run scraper
+- [x] Endpoint status scraper
+- [x] Endpoint config scraper
+- [x] UI config & status di dashboard
 
 **Testing**
 - [ ] Test scrape 1 keyword, 1 kota
