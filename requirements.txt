@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+playwright
+litellm
+python-dotenv
+apscheduler
+httpx
+beautifulsoup4
+jinja2
+python-multipart
+openpyxl
