@@ -551,11 +551,11 @@ async def save_config(config: ScraperConfigSchema):
 - [x] UI config & status di dashboard
 
 **Testing**
-- [ ] Test scrape 1 keyword, 1 kota
-- [ ] Verifikasi data masuk database
-- [ ] Test resume jika dijalankan ulang
-- [ ] Test daily limit 20 bisnis
-- [ ] Test deduplication
+- [x] Test scrape 1 keyword, 1 kota
+- [x] Verifikasi data masuk database
+- [x] Test resume jika dijalankan ulang
+- [x] Test daily limit 20 bisnis
+- [x] Test deduplication
 
 ---
 

@@ -324,10 +324,10 @@ DATABASE_URL=sqlite:///./data/client_finder.db
 - [x] Buat halaman settings kosong
 
 **Testing**
-- [ ] Jalankan server: `uvicorn main:app --reload`
-- [ ] Akses `http://localhost:8000`
-- [ ] Pastikan semua tabel terbuat
-- [ ] Pastikan halaman dashboard & settings terbuka
+- [x] Jalankan server: `uvicorn main:app --reload`
+- [x] Akses `http://localhost:8000`
+- [x] Pastikan semua tabel terbuat
+- [x] Pastikan halaman dashboard & settings terbuka
 
 ---
 
