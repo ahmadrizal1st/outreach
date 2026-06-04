@@ -56,7 +56,7 @@ def seed():
             db.add(config)
         db.commit()
 
-        print("✅ Seed data berhasil")
+        print("[SUCCESS] Seed data berhasil")
     finally:
         db.close()
 

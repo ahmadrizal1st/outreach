@@ -12,5 +12,7 @@ templates = Jinja2Templates(directory=templates_dir)
 @router.get("/", response_class=HTMLResponse)
 async def read_settings(request: Request):
     return templates.TemplateResponse(
-        request=request, name="settings.html", context={"title": "Settings"}
+        request=request,
+        name="settings.html",
+        context={"request": request, "title": "Settings"}
     )

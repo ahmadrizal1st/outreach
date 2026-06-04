@@ -16,10 +16,7 @@ templates = Jinja2Templates(directory=templates_dir)
 async def get_followups_today(request: Request, db: Session = Depends(get_db)):
     tracker = FollowupTracker()
     followups = tracker.get_followups_today()
-    return templates.TemplateResponse(
-        "followup/list.html",
-        {"request": request, "followups": followups}
-    )
+    return templates.TemplateResponse(request=request, name="followup/list.html", context={"request": request, "followups": followups})
 
 @router.post("/api/check")
 async def run_followup_check(db: Session = Depends(get_db)):
@@ -52,7 +49,7 @@ async def mark_followup_sent(request: Request, prospect_id: int, db: Session = D
             "priority_score": ps.priority_score,
             "pitch_angle": ps.pitch_angle
         }
-        return templates.TemplateResponse("followup/card.html", {"request": request, "prospect": prospect_data})
+        return templates.TemplateResponse(request=request, name="followup/card.html", context={"request": request, "prospect": prospect_data})
     return HTMLResponse("Updated")
 
 @router.post("/api/cold/{prospect_id}")

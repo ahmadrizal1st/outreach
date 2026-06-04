@@ -13,8 +13,8 @@
   hx-target="#message-preview"
   hx-swap="innerHTML"
   class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg w-full transition-colors shadow-sm"
-  onclick="this.innerHTML='<span class=\'animate-pulse\'>✨ Menggenerate Pesan...</span>'">
-  ✨ Generate Pesan Pertama
+  onclick="this.innerHTML='<span class=\'animate-pulse\'><i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i> Menggenerate Pesan...</span>'">
+  <i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i> Generate Pesan Pertama
 </button>
 
 <!-- Generate followups using prompt based on pipeline -->
@@ -25,8 +25,8 @@
   hx-target="#message-preview"
   hx-swap="innerHTML"
   class="mt-2 flex items-center justify-center gap-2 bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-sm font-medium py-2 px-4 rounded-lg w-full transition-colors shadow-sm"
-  onclick="this.innerHTML='<span class=\'animate-pulse\'>✨ Menggenerate Follow-up...</span>'">
-  🔄 Generate Pesan Follow-up
+  onclick="this.innerHTML='<span class=\'animate-pulse\'><i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i> Menggenerate Follow-up...</span>'">
+  <i class="fa-solid fa-rotate-right"></i> Generate Pesan Follow-up
 </button>
 {% endif %}
 

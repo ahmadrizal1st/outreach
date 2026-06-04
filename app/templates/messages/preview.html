@@ -1,7 +1,7 @@
 <div id="message-preview" class="space-y-4">
   <div class="flex justify-between items-center border-b border-gray-100 pb-2">
     <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
-      <span>💬</span> Pilih Variasi Pesan
+      <span><i class="fa-brands fa-whatsapp"></i></span> Pilih Variasi Pesan
     </h3>
     <button
       hx-post="/messages/regenerate/{{ prospect_id }}"
@@ -9,7 +9,7 @@
       hx-swap="outerHTML"
       class="text-xs text-indigo-600 hover:text-indigo-800 font-medium bg-indigo-50 px-2 py-1 rounded-md transition-colors"
       onclick="this.innerHTML='Menggenerate...'">
-      🔄 Generate Ulang
+      <i class="fa-solid fa-rotate-right"></i> Generate Ulang
     </button>
   </div>
 

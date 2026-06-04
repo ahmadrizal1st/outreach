@@ -23,10 +23,7 @@ async def generate_first_message(
     generator = MessageGenerator(manual_provider=provider)
     result = await generator.generate_first(prospect_id)
     
-    return templates.TemplateResponse(
-        "messages/preview.html",
-        {"request": request, "result": result, "prospect_id": prospect_id, "generator": generator}
-    )
+    return templates.TemplateResponse(request=request, name="messages/preview.html", context={"request": request, "result": result, "prospect_id": prospect_id, "generator": generator})
 
 @router.post("/followup/{prospect_id}", response_class=HTMLResponse)
 async def generate_followup_message(
@@ -39,10 +36,7 @@ async def generate_followup_message(
     generator = MessageGenerator(manual_provider=provider)
     result = await generator.generate_followup(prospect_id, sequence)
     
-    return templates.TemplateResponse(
-        "messages/preview.html",
-        {"request": request, "result": result, "prospect_id": prospect_id, "generator": generator}
-    )
+    return templates.TemplateResponse(request=request, name="messages/preview.html", context={"request": request, "result": result, "prospect_id": prospect_id, "generator": generator})
 
 @router.post("/regenerate/{prospect_id}", response_class=HTMLResponse)
 async def regenerate_message(
@@ -54,10 +48,7 @@ async def regenerate_message(
     generator = MessageGenerator(manual_provider=provider)
     result = await generator.generate_first(prospect_id)
     
-    return templates.TemplateResponse(
-        "messages/preview.html",
-        {"request": request, "result": result, "prospect_id": prospect_id, "generator": generator}
-    )
+    return templates.TemplateResponse(request=request, name="messages/preview.html", context={"request": request, "result": result, "prospect_id": prospect_id, "generator": generator})
 
 @router.post("/sent/{message_id}")
 async def mark_sent(message_id: int, db: Session = Depends(get_db)):
@@ -73,7 +64,4 @@ async def message_history(request: Request, prospect_id: int, db: Session = Depe
     messages = db.query(Message).filter(Message.prospect_id == prospect_id).order_by(Message.generated_at.desc()).all()
     prospect = db.query(Prospect).filter(Prospect.id == prospect_id).first()
     
-    return templates.TemplateResponse(
-        "messages/history.html",
-        {"request": request, "messages": messages, "phone": prospect.phone_normalized if prospect else ""}
-    )
+    return templates.TemplateResponse(request=request, name="messages/history.html", context={"request": request, "messages": messages, "phone": prospect.phone_normalized if prospect else ""})

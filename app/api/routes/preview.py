@@ -16,10 +16,7 @@ templates = Jinja2Templates(directory=templates_dir)
 async def generate_preview(request: Request, prospect_id: int, provider: str = None, db: Session = Depends(get_db)):
     generator = PreviewGenerator(provider)
     result = await generator.generate(prospect_id)
-    return templates.TemplateResponse(
-        "preview/preview_card.html",
-        {"request": request, "result": result, "prospect_id": prospect_id}
-    )
+    return templates.TemplateResponse(request=request, name="preview/preview_card.html", context={"request": request, "result": result, "prospect_id": prospect_id})
 
 @router.get("/open/{prospect_id}")
 async def open_preview(prospect_id: int):
@@ -35,10 +32,7 @@ async def open_preview(prospect_id: int):
 async def regenerate_preview(request: Request, prospect_id: int, provider: str = None, db: Session = Depends(get_db)):
     generator = PreviewGenerator(provider)
     result = await generator.generate(prospect_id)
-    return templates.TemplateResponse(
-        "preview/preview_card.html",
-        {"request": request, "result": result, "prospect_id": prospect_id}
-    )
+    return templates.TemplateResponse(request=request, name="preview/preview_card.html", context={"request": request, "result": result, "prospect_id": prospect_id})
 
 @router.post("/expire")
 async def run_expire_check():
@@ -58,7 +52,4 @@ async def get_preview_status(request: Request, prospect_id: int, db: Session = D
     else:
         result = {"status": "none"}
         
-    return templates.TemplateResponse(
-        "preview/preview_card.html",
-        {"request": request, "result": result, "prospect_id": prospect_id}
-    )
+    return templates.TemplateResponse(request=request, name="preview/preview_card.html", context={"request": request, "result": result, "prospect_id": prospect_id})

@@ -9,9 +9,9 @@
       <!-- Filter Tier -->
       <select hx-get="/prospects/filter" hx-trigger="change" hx-target="#prospect-list" name="tier" class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
         <option value="">Semua Tier</option>
-        <option value="HOT">🔥 HOT</option>
-        <option value="WARM">🟡 WARM</option>
-        <option value="COLD">🔵 COLD</option>
+        <option value="HOT"><i class="fa-solid fa-fire text-red-500"></i> HOT</option>
+        <option value="WARM"><i class="fa-solid fa-circle text-yellow-500"></i> WARM</option>
+        <option value="COLD"><i class="fa-solid fa-circle text-blue-500"></i> COLD</option>
       </select>
 
       <!-- Filter Industri -->
@@ -32,7 +32,7 @@
         <option value="belum_dihubungi">Belum Dihubungi</option>
         <option value="sudah_dihubungi">Sudah Dihubungi</option>
         <option value="dibalas">Dibalas</option>
-        <option value="deal">Deal ✅</option>
+        <option value="deal">Deal <i class="fa-solid fa-check-circle"></i></option>
       </select>
     </div>
 

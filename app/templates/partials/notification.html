@@ -1,10 +1,16 @@
-{% if contacted_today < 10 %}
-<div class="bg-amber-50 border-b border-amber-200 px-4 py-2 text-sm text-amber-700">
-  📢 Kamu baru menghubungi <strong>{{ contacted_today }}</strong> dari <strong>10</strong> target hari ini.
-  <a href="/" class="underline ml-1">Lihat rekomendasi &rarr;</a>
-</div>
-{% else %}
-<div class="bg-green-50 border-b border-green-200 px-4 py-2 text-sm text-green-700">
-  ✅ Target hari ini tercapai! {{ contacted_today }} kontak sudah dihubungi.
-</div>
+{% if contacted_today is defined %}
+  {% if contacted_today < 10 %}
+  <div class="bg-amber-50 border-b border-amber-200">
+    <div class="max-w-7xl mx-auto px-4 py-2 text-sm text-amber-700">
+      <i class="fa-solid fa-bullhorn"></i> Kamu baru menghubungi <strong>{{ contacted_today }}</strong> dari <strong>10</strong> target hari ini.
+      <a href="/" class="underline ml-1">Lihat rekomendasi &rarr;</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="bg-green-50 border-b border-green-200">
+    <div class="max-w-7xl mx-auto px-4 py-2 text-sm text-green-700">
+      <i class="fa-solid fa-check-circle"></i> Target hari ini tercapai! {{ contacted_today }} kontak sudah dihubungi.
+    </div>
+  </div>
+  {% endif %}
 {% endif %}

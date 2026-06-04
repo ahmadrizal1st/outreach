@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width">
   <title>{{ business_name }}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-rose-50 text-gray-800 font-sans">
 
   <div class="bg-rose-400 text-white text-center py-2 text-xs">
-    ✨ Preview Website — {{ preview_note }} (Aktif sampai: {{ expired_date }})
+    <i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i> Preview Website — {{ preview_note }} (Aktif sampai: {{ expired_date }})
   </div>
 
   <section class="py-20 px-6 max-w-4xl mx-auto text-center">
@@ -43,7 +44,7 @@
   <footer class="bg-rose-900 text-rose-200 py-12 px-6 text-center">
     <p class="mb-4">{{ address }}</p>
     <p class="mb-8 font-serif italic text-xl">{{ footer_tagline }}</p>
-    <p class="text-sm text-rose-400">© {{ business_name }}</p>
+    <p class="text-sm text-rose-400">&copy; {{ business_name }}</p>
   </footer>
 
 </body>

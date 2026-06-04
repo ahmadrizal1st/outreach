@@ -25,10 +25,10 @@ def get_or_create_pipeline(db: Session, prospect_id: int):
 @router.get("/", response_class=HTMLResponse)
 async def pipeline_board(request: Request, db: Session = Depends(get_db)):
     columns = [
-        {"id": "belum_dihubungi", "label": "Belum Dihubungi", "icon": "📝"},
-        {"id": "sudah_dihubungi", "label": "Sudah Dihubungi", "icon": "📨"},
-        {"id": "dibalas", "label": "Dibalas", "icon": "💬"},
-        {"id": "deal", "label": "Deal ✅", "icon": "🎉"}
+        {"id": "belum_dihubungi", "label": "Belum Dihubungi", "icon": "<i class='fa-solid fa-note-sticky'></i>"},
+        {"id": "sudah_dihubungi", "label": "Sudah Dihubungi", "icon": "[SENT]"},
+        {"id": "dibalas", "label": "Dibalas", "icon": "[MSG]"},
+        {"id": "deal", "label": "Deal [SUCCESS]", "icon": "[DEAL]"}
     ]
     
     pipeline_columns = []
@@ -70,7 +70,7 @@ async def pipeline_board(request: Request, db: Session = Depends(get_db)):
             "prospects": col_prospects
         })
         
-    return templates.TemplateResponse("pipeline/board.html", {"request": request, "pipeline_columns": pipeline_columns})
+    return templates.TemplateResponse(request=request, name="pipeline/board.html", context={"request": request, "pipeline_columns": pipeline_columns})
 
 
 @router.post("/skip/{id}")

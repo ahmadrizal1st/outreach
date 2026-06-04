@@ -8,8 +8,9 @@ templates = Jinja2Templates(directory=templates_dir)
 
 async def http_exception_handler(request: Request, exc):
     return templates.TemplateResponse(
-        "errors/error.html",
-        {
+        request=request,
+        name="errors/error.html",
+        context={
             "request": request,
             "status_code": exc.status_code,
             "detail": exc.detail
@@ -19,8 +20,9 @@ async def http_exception_handler(request: Request, exc):
 
 async def general_exception_handler(request: Request, exc):
     return templates.TemplateResponse(
-        "errors/error.html",
-        {
+        request=request,
+        name="errors/error.html",
+        context={
             "request": request,
             "status_code": 500,
             "detail": str(exc)

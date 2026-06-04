@@ -100,4 +100,4 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db)):
         "contacted_today": contacted_today
     }
     
-    return templates.TemplateResponse("dashboard.html", context)
+    return templates.TemplateResponse(request=request, name="dashboard.html", context=context)

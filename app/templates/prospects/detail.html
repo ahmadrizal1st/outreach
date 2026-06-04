@@ -6,7 +6,14 @@
   <!-- Header Section -->
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-start justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">{{ prospect.name }}</h1>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold text-gray-900">{{ prospect.name }}</h1>
+        {% if prospect.is_claimed == False %}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200" title="Peluang bagus untuk menawarkan jasa GMB Optimization!">
+            <i class="fa-solid fa-triangle-exclamation"></i> Belum Diklaim
+          </span>
+        {% endif %}
+      </div>
       <p class="text-gray-500 mt-1 flex items-center gap-2">
         {{ prospect.category }} &middot; {{ prospect.city }}
         {% if pipeline %}
@@ -20,9 +27,9 @@
           {% if score.priority_tier == 'HOT' %} bg-red-50 text-red-700 border border-red-100
           {% elif score.priority_tier == 'WARM' %} bg-yellow-50 text-yellow-700 border border-yellow-100
           {% else %} bg-gray-50 text-gray-700 border border-gray-200 {% endif %}">
-        {% if score.priority_tier == 'HOT' %} 🔥
-        {% elif score.priority_tier == 'WARM' %} 🟡
-        {% else %} 🔵 {% endif %}
+        {% if score.priority_tier == 'HOT' %} <i class="fa-solid fa-fire text-red-500"></i>
+        {% elif score.priority_tier == 'WARM' %} <i class="fa-solid fa-circle text-yellow-500"></i>
+        {% else %} <i class="fa-solid fa-circle text-blue-500"></i> {% endif %}
         {{ score.priority_tier }} {{ score.priority_score }}
       </span>
     </div>
@@ -33,7 +40,7 @@
     <!-- Info Bisnis -->
     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-        <span>📋</span> Info Bisnis
+        <span><i class="fa-solid fa-clipboard-list"></i></span> Info Bisnis
       </h2>
       <div class="space-y-4 text-sm">
         <div>
@@ -43,7 +50,7 @@
         <div>
           <p class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Rating</p>
           <p class="font-medium text-gray-900 mt-1">
-            ⭐ {{ prospect.rating or 'N/A' }} ({{ prospect.review_count or 0 }} ulasan)
+            <i class="fa-solid fa-star text-yellow-400"></i> {{ prospect.rating or 'N/A' }} ({{ prospect.review_count or 0 }} ulasan)
           </p>
         </div>
         <div>
@@ -62,7 +69,18 @@
         </div>
         {% if prospect.google_maps_url %}
         <div class="pt-2">
-          <a href="{{ prospect.google_maps_url }}" target="_blank" class="text-indigo-600 hover:underline text-sm font-medium">Buka di Google Maps &rarr;</a>
+          <a href="{{ prospect.google_maps_url }}" target="_blank" class="text-indigo-600 hover:underline text-sm font-medium"><i class="fa-solid fa-location-dot"></i> Buka di Google Maps &rarr;</a>
+        </div>
+        {% endif %}
+        {% if prospect.instagram_url %}
+        <div class="pt-1">
+          <a href="{{ prospect.instagram_url }}" target="_blank" class="text-pink-600 hover:underline text-sm font-medium"><i class="fa-brands fa-instagram"></i> Buka Instagram &rarr;</a>
+        </div>
+        {% endif %}
+        {% if prospect.about_summary %}
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <p class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Tentang Bisnis</p>
+          <p class="text-sm text-gray-700 mt-1 leading-relaxed">{{ prospect.about_summary }}</p>
         </div>
         {% endif %}
       </div>
@@ -71,7 +89,7 @@
     <!-- AI Analysis -->
     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col h-full">
       <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-        <span>🤖</span> AI Analysis
+        <span><i class="fa-solid fa-robot"></i></span> AI Analysis
       </h2>
       {% if score %}
         <div class="space-y-4 text-sm flex-1">
@@ -105,7 +123,7 @@
     <!-- Website Review -->
     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-full flex flex-col">
       <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-        <span>🌐</span> Review Website
+        <span><i class="fa-solid fa-globe"></i></span> Review Website
       </h2>
       <div id="review-container" class="flex-1 flex flex-col">
         {% if review %}
@@ -118,7 +136,7 @@
               {% else %}
                 <p class="text-sm text-gray-500 mb-4">Belum ada hasil scan website.</p>
                 <button hx-post="/review/{{ prospect.id }}" hx-target="#review-container" class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 rounded-lg transition-colors text-sm" onclick="this.innerHTML='<span class=\'animate-pulse\'>Menganalisis...</span>'">
-                  🔍 Scan Website Sekarang
+                  <i class="fa-solid fa-magnifying-glass"></i> Scan Website Sekarang
                 </button>
               {% endif %}
             </div>
@@ -132,7 +150,7 @@
       <!-- Quick Action -->
       <div>
         <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <span>📱</span> Tindakan (Action)
+          <span><i class="fa-solid fa-mobile-screen"></i></span> Tindakan (Action)
         </h2>
         {% include 'partials/wa_button.html' %}
       </div>
@@ -162,7 +180,7 @@
   <!-- Preview Website Section -->
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
     <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-      <span>🎨</span> Preview Website
+      <span><i class="fa-solid fa-palette"></i></span> Preview Website
     </h2>
     <div id="preview-{{ prospect.id }}"
       hx-get="/api/preview/status/{{ prospect.id }}"
@@ -180,7 +198,7 @@
   <!-- Pipeline Status -->
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
     <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-      <span>📊</span> Pipeline Status
+      <span><i class="fa-solid fa-chart-bar"></i></span> Pipeline Status
     </h2>
     <div class="flex flex-wrap gap-2 mb-4">
       {% for status in pipeline_statuses %}

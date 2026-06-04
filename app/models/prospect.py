@@ -22,7 +22,11 @@ class Prospect(Base):
     phone_normalized = Column(String)
     website = Column(String)
     email = Column(String)
+    instagram_url = Column(String)
     wa_valid = Column(Boolean, default=False)
+    
+    is_claimed = Column(Boolean, default=True)
+    about_summary = Column(String)
 
     rating = Column(Float)
     review_count = Column(Integer)

@@ -14,9 +14,9 @@ def backup():
 
     if os.path.exists(src):
         shutil.copy2(src, backup_file)
-        print(f"✅ Backup tersimpan: {backup_file}")
+        print(f"[SUCCESS] Backup tersimpan: {backup_file}")
     else:
-        print("❌ Database tidak ditemukan")
+        print("[ERROR] Database tidak ditemukan")
 
 if __name__ == "__main__":
     backup()

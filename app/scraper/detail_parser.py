@@ -49,6 +49,15 @@ class DetailParser:
         # Foto
         data['photo_urls'] = await self._get_photos(page)
 
+        # Status Klaim Bisnis
+        data['is_claimed'] = await self._check_is_claimed(page)
+        
+        # Instagram URL
+        data['instagram_url'] = await self._get_instagram(page)
+        
+        # About Summary
+        data['about_summary'] = await self._get_about_summary(page)
+
         return data
 
     async def _get_text(self, page, selector):
@@ -99,3 +108,32 @@ class DetailParser:
             return str(photos)
         except:
             return None
+
+    async def _check_is_claimed(self, page):
+        try:
+            content = await page.content()
+            if "Klaim bisnis ini" in content or "Own this business?" in content or "Claim this business" in content:
+                return False
+            return True
+        except:
+            return True
+
+    async def _get_instagram(self, page):
+        try:
+            links = await page.query_selector_all('a[href*="instagram.com"]')
+            for link in links:
+                href = await link.get_attribute('href')
+                if href and 'instagram.com' in href:
+                    return href
+        except:
+            pass
+        return None
+
+    async def _get_about_summary(self, page):
+        try:
+            summary_el = await page.query_selector('div.PYvSYb')
+            if summary_el:
+                return await summary_el.inner_text()
+        except:
+            pass
+        return None

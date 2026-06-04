@@ -16,7 +16,7 @@ templates = Jinja2Templates(directory=templates_dir)
 async def page_prospects(request: Request, db: Session = Depends(get_db)):
     # Render main page. HTMX will load the filter list.
     prospects = db.query(Prospect).limit(20).all() # default initial load
-    return templates.TemplateResponse("prospects/list.html", {"request": request, "prospects": prospects})
+    return templates.TemplateResponse(request=request, name="prospects/list.html", context={"request": request, "prospects": prospects})
 
 @router.get("/filter", response_class=HTMLResponse)
 async def filter_prospects(
@@ -66,8 +66,9 @@ async def filter_prospects(
         })
 
     return templates.TemplateResponse(
-        "partials/prospect_card.html" if len(prospects) == 1 else "prospects/list.html", 
-        {"request": request, "prospects": prospects}
+        request=request,
+        name="partials/prospect_card.html" if len(prospects) == 1 else "prospects/list.html", 
+        context={"request": request, "prospects": prospects}
     )
 
 @router.get("/{id}", response_class=HTMLResponse)
@@ -84,9 +85,9 @@ async def prospect_detail(request: Request, id: int, db: Session = Depends(get_d
     pipeline_statuses = [
         {"value": "belum_dihubungi", "label": "Belum Dihubungi"},
         {"value": "sudah_dihubungi", "label": "Sudah Dihubungi"},
-        {"value": "perlu_followup", "label": "Perlu Follow-up 🔔"},
+        {"value": "perlu_followup", "label": "Perlu Follow-up"},
         {"value": "dibalas", "label": "Dibalas"},
-        {"value": "deal", "label": "Deal ✅"},
+        {"value": "deal", "label": "Deal"},
         {"value": "tidak_tertarik", "label": "Tidak Tertarik"}
     ]
 
@@ -101,4 +102,4 @@ async def prospect_detail(request: Request, id: int, db: Session = Depends(get_d
         "pipeline_statuses": pipeline_statuses
     }
     
-    return templates.TemplateResponse("prospects/detail.html", context)
+    return templates.TemplateResponse(request=request, name="prospects/detail.html", context=context)

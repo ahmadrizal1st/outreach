@@ -27,10 +27,7 @@ async def scan_website(
     # We fetch the updated review to pass to the template
     review = db.query(WebsiteReview).filter(WebsiteReview.prospect_id == prospect_id).first()
     
-    return templates.TemplateResponse(
-        "review/result.html",
-        {"request": request, "review": review, "prospect_id": prospect_id, "scan_result": result}
-    )
+    return templates.TemplateResponse(request=request, name="review/result.html", context={"request": request, "review": review, "prospect_id": prospect_id, "scan_result": result})
 
 @router.post("/all")
 async def scan_all_unreviewed(provider: str = None):
@@ -65,10 +62,7 @@ async def save_manual_review(
     recalculate_score_after_review(db, prospect_id, review)
 
     # Return the updated result view
-    return templates.TemplateResponse(
-        "review/result.html",
-        {"request": request, "review": review, "prospect_id": prospect_id}
-    )
+    return templates.TemplateResponse(request=request, name="review/result.html", context={"request": request, "review": review, "prospect_id": prospect_id})
 
 def recalculate_score_after_review(db: Session, prospect_id: int, review: WebsiteReview):
     score = db.query(ProspectScore).filter(ProspectScore.prospect_id == prospect_id).first()
