@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>{{ business_name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-800 font-sans">
+
+  <div class="bg-neutral-900 text-neutral-300 text-center py-2 text-xs uppercase tracking-widest">
+    Preview Website - {{ expired_date }}
+  </div>
+
+  <section class="py-24 px-6 text-center bg-white border-b border-neutral-200">
+    <p class="text-sm uppercase tracking-[0.3em] text-neutral-400 mb-4">Welcome To</p>
+    <h1 class="text-5xl font-light text-neutral-900 mb-6">{{ business_name }}</h1>
+    <p class="text-lg text-neutral-500 mb-10 max-w-2xl mx-auto font-serif italic">"{{ tagline }}"</p>
+    <p class="text-neutral-600 max-w-lg mx-auto mb-10">{{ hero_description }}</p>
+    <a href="https://wa.me/{{ phone_wa }}" class="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 rounded-none uppercase tracking-widest text-sm transition-colors">
+      {{ cta_text }}
+    </a>
+  </section>
+
+  <section class="py-20 px-6 max-w-5xl mx-auto">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-10">
+      {% for service in services %}
+      <div class="text-center group">
+        <div class="w-16 h-16 mx-auto border-2 border-neutral-900 flex items-center justify-center mb-6 group-hover:bg-neutral-900 group-hover:text-white transition-colors">
+          <span class="text-xl">✨</span>
+        </div>
+        <h3 class="font-bold text-neutral-900 mb-3 uppercase tracking-wide">{{ service.title }}</h3>
+        <p class="text-sm text-neutral-500">{{ service.description }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="bg-neutral-100 py-20 px-6 text-center">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-3xl font-light mb-8 text-neutral-900">Experience Excellence</h2>
+      <p class="text-neutral-600 leading-relaxed">{{ about_text }}</p>
+    </div>
+  </section>
+
+  <footer class="bg-neutral-900 text-neutral-400 py-16 px-6 text-center">
+    <p class="mb-6 uppercase tracking-widest text-sm text-white">{{ business_name }}</p>
+    <p class="mb-2 text-sm">{{ address }}</p>
+    <p class="mb-10 text-sm">Resrvations: {{ phone }}</p>
+    <p class="text-xs">{{ footer_tagline }}</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>{{ business_name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans selection:bg-amber-500 selection:text-white">
+
+  <div class="bg-amber-600 text-white text-center py-2 text-xs font-mono tracking-wider">
+    🎨 PREVIEW WEBSITE — {{ preview_note }} BERLAKU HINGGA {{ expired_date }}
+  </div>
+
+  <section class="py-24 px-6 text-center bg-[url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center bg-no-repeat relative">
+    <div class="absolute inset-0 bg-gray-900/80"></div>
+    <div class="relative z-10">
+      <h1 class="text-5xl font-extrabold mb-4 text-white tracking-tight">{{ business_name }}</h1>
+      <p class="text-xl text-amber-400 mb-4 font-light">{{ tagline }}</p>
+      <p class="text-gray-300 mb-10 max-w-xl mx-auto">{{ hero_description }}</p>
+      <div class="flex justify-center gap-4">
+        <a href="https://wa.me/{{ phone_wa }}" class="bg-amber-600 hover:bg-amber-700 text-white font-medium px-8 py-3 rounded uppercase tracking-wider transition-all">
+          {{ cta_text }}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {% if review_count > 0 %}
+  <section class="bg-gray-800 py-10 text-center border-y border-gray-700">
+    <p class="text-3xl font-bold text-amber-500">⭐ {{ rating }}</p>
+    <p class="text-gray-400 mt-1 text-sm uppercase tracking-widest">{{ review_count }} ulasan di Google Maps</p>
+  </section>
+  {% endif %}
+
+  <section class="py-20 px-6 max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold text-center mb-12 text-white">Menu & Layanan</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+      {% for service in services %}
+      <div class="bg-gray-800 rounded-lg p-8 text-center border border-gray-700 hover:border-amber-500 transition-colors">
+        <div class="text-4xl mb-4 text-amber-500">☕</div>
+        <h3 class="font-bold mb-3 text-white text-lg">{{ service.title }}</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">{{ service.description }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="bg-gray-800 py-20 px-6">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-3xl font-bold mb-6 text-white">Cerita Kami</h2>
+      <p class="text-gray-300 leading-relaxed text-lg font-light">{{ about_text }}</p>
+    </div>
+  </section>
+
+  <footer class="bg-black py-16 px-6 text-center border-t border-gray-800">
+    <h2 class="text-2xl font-bold mb-6 text-white">Kunjungi Kami</h2>
+    <p class="text-gray-400 mb-8 max-w-md mx-auto">{{ address }}</p>
+    <div class="flex justify-center gap-4 mb-12">
+      <a href="tel:{{ phone }}" class="text-gray-300 hover:text-amber-500 transition-colors px-4 py-2 border border-gray-700 rounded">📞 {{ phone }}</a>
+      {% if maps_url %}
+      <a href="{{ maps_url }}" target="_blank" class="text-gray-300 hover:text-amber-500 transition-colors px-4 py-2 border border-gray-700 rounded">📍 Buka Peta</a>
+      {% endif %}
+    </div>
+    <p class="text-amber-600 font-medium">{{ footer_tagline }}</p>
+    <p class="mt-2 text-gray-600 text-sm">© {{ business_name }}</p>
+  </footer>
+
+</body>
+</html>
