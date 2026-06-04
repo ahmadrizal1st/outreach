@@ -1,26 +1,55 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Dashboard
-        </h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500">
-            Welcome to Client Finder.
-        </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                Dashboard
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Welcome to Client Finder.
+            </p>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+            <dl class="sm:divide-y sm:divide-gray-200">
+                <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Total Prospects</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">0</dd>
+                </div>
+                <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Active Pipelines</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">0</dd>
+                </div>
+            </dl>
+        </div>
     </div>
-    <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
-        <dl class="sm:divide-y sm:divide-gray-200">
-            <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt class="text-sm font-medium text-gray-500">Total Prospects</dt>
-                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">0</dd>
+
+    <!-- Scraper Panel -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    ⚙️ Scraper Engine
+                </h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                    Manage and view scraping progress.
+                </p>
             </div>
-            <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt class="text-sm font-medium text-gray-500">Active Pipelines</dt>
-                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">0</dd>
-            </div>
-        </dl>
+            <a href="/settings" class="text-sm text-indigo-600 hover:text-indigo-900">Edit Config</a>
+        </div>
+        <div class="border-t border-gray-200 p-6" hx-get="/scraper/status" hx-trigger="load, every 5s">
+            <p class="text-gray-500 italic">Loading status...</p>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex gap-4">
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded shadow-sm focus:outline-none"
+                hx-post="/scraper/run" hx-swap="none" onclick="alert('Scraper started in background')">
+                ▶ Jalankan Sekarang
+            </button>
+            <button class="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-4 rounded shadow-sm focus:outline-none">
+                ⏸ Stop
+            </button>
+        </div>
     </div>
 </div>
 {% endblock %}

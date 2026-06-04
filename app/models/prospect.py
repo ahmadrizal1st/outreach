@@ -173,3 +173,15 @@ class ScraperConfig(Base):
     is_active = Column(Boolean, default=True)
     last_run_at = Column(DateTime)
     created_at = Column(DateTime, default=func.now())
+
+
+class ScraperProgress(Base):
+    __tablename__ = "scraper_progress"
+
+    id = Column(Integer, primary_key=True, index=True)
+    keyword = Column(String)
+    city = Column(String)
+    total_found = Column(Integer, default=0)
+    total_saved = Column(Integer, default=0)
+    scraped_at = Column(DateTime, default=func.now())
+    status = Column(String, default="completed")

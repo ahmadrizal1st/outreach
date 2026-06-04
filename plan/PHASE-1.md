@@ -341,5 +341,3 @@ DATABASE_URL=sqlite:///./data/client_finder.db
 | Frontend base template | 1–2 jam |
 | Testing & fix | 1 jam |
 | **Total** | **~1 hari** |
-
----
