@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="font-bold text-2xl text-gray-900 flex items-center gap-2">
+      <span>🔔</span> Follow-up Hari Ini
+    </h1>
+    <span class="bg-orange-100 text-orange-600 font-medium text-sm px-3 py-1 rounded-full border border-orange-200">
+      {{ followups | length }} menunggu tindakan
+    </span>
+  </div>
+
+  {% if not followups %}
+  <div class="bg-white rounded-xl p-12 text-center text-gray-400 shadow-sm border border-gray-100">
+    <p class="text-5xl mb-4">✅</p>
+    <p class="text-lg font-medium text-gray-600">Tidak ada follow-up hari ini</p>
+    <p class="text-sm mt-1">Semua prospect yang perlu dihubungi sudah Anda proses.</p>
+  </div>
+  {% else %}
+  <div class="space-y-4">
+    {% for prospect in followups %}
+      {% include 'followup/card.html' %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

@@ -84,6 +84,7 @@ async def prospect_detail(request: Request, id: int, db: Session = Depends(get_d
     pipeline_statuses = [
         {"value": "belum_dihubungi", "label": "Belum Dihubungi"},
         {"value": "sudah_dihubungi", "label": "Sudah Dihubungi"},
+        {"value": "perlu_followup", "label": "Perlu Follow-up 🔔"},
         {"value": "dibalas", "label": "Dibalas"},
         {"value": "deal", "label": "Deal ✅"},
         {"value": "tidak_tertarik", "label": "Tidak Tertarik"}

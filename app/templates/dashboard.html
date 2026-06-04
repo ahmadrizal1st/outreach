@@ -34,16 +34,24 @@
 
     <!-- Follow-up Hari Ini -->
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-      <h3 class="font-semibold text-sm mb-3">🔔 Follow-up Hari Ini</h3>
-      {% for f in followups_today %}
-      <div class="border-b last:border-0 py-2 text-sm">
-        <p class="font-medium">{{ f.name }}</p>
-        <p class="text-gray-500 text-xs">Follow-up #{{ f.sequence }}</p>
-        <a href="{{ f.wa_link }}" target="_blank" class="text-green-600 text-xs font-medium">Buka WA &rarr;</a>
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-semibold text-sm">🔔 Follow-up Hari Ini</h3>
+        <a href="/followup/today" class="text-xs text-indigo-600 font-medium hover:underline">Lihat semua &rarr;</a>
       </div>
+
+      {% if summary.followups_today == 0 %}
+      <p class="text-xs text-gray-400 text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+        ✅ Tidak ada follow-up hari ini
+      </p>
       {% else %}
-      <p class="text-xs text-gray-500 italic">Tidak ada follow-up hari ini.</p>
-      {% endfor %}
+      <div class="text-center py-2">
+        <p class="text-3xl font-bold text-orange-500">{{ summary.followups_today }}</p>
+        <p class="text-xs text-gray-500 mt-1">prospect menunggu follow-up</p>
+        <a href="/followup/today" class="block mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">
+          Lihat & Kirim &rarr;
+        </a>
+      </div>
+      {% endif %}
     </div>
 
     <!-- Scraper Status -->

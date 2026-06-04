@@ -1,0 +1,72 @@
+<div id="followup-{{ prospect.id }}" class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative">
+
+  <!-- Header -->
+  <div class="flex justify-between items-start mb-4">
+    <div>
+      <a href="/prospects/{{ prospect.id }}" class="font-semibold text-lg text-gray-900 hover:text-indigo-600 transition-colors">{{ prospect.name }}</a>
+      <p class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+        <span class="bg-gray-100 px-2 py-0.5 rounded">{{ prospect.category }}</span> 
+        <span>📍 {{ prospect.city }}</span>
+      </p>
+    </div>
+    <div class="text-right flex flex-col items-end gap-1">
+      <span class="text-xs bg-orange-50 text-orange-600 border border-orange-100 font-semibold px-2.5 py-1 rounded-full uppercase tracking-wide">
+        Follow-up #{{ prospect.followup_count + 1 }}
+      </span>
+      <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
+        {{ prospect.priority_tier }} {{ prospect.priority_score }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Pitch Angle -->
+  <div class="bg-indigo-50 rounded-lg p-3 mb-4 border border-indigo-100">
+    <p class="text-sm text-indigo-800 leading-relaxed">
+      <span class="font-semibold block mb-1 uppercase tracking-wider text-[10px] text-indigo-500">💡 Pitch Angle</span>
+      {{ prospect.pitch_angle }}
+    </p>
+  </div>
+
+  <!-- Generate & WA -->
+  <div id="followup-message-{{ prospect.id }}" class="mb-4">
+    <button
+      hx-post="/messages/followup/{{ prospect.id }}?sequence={{ prospect.followup_count + 1 }}"
+      hx-target="#followup-message-{{ prospect.id }}"
+      hx-swap="innerHTML"
+      class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm py-2.5 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+      onclick="this.innerHTML='<span class=\'animate-pulse\'>✨ Menggenerate Pesan...</span>'">
+      ✨ Generate Pesan Follow-up
+    </button>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex gap-2">
+    <button
+      hx-post="/followup/api/sent/{{ prospect.id }}"
+      hx-target="#followup-{{ prospect.id }}"
+      hx-swap="outerHTML"
+      class="flex-1 border border-green-200 bg-green-50 hover:bg-green-100 text-green-700 text-sm font-medium py-2 rounded-lg transition-colors">
+      ✅ Tandai Terkirim
+    </button>
+
+    <button
+      hx-post="/followup/api/cold/{{ prospect.id }}"
+      hx-confirm="Yakin ingin menandai prospect ini sebagai COLD?"
+      hx-target="#followup-{{ prospect.id }}"
+      hx-swap="outerHTML"
+      class="flex-1 border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm font-medium py-2 rounded-lg transition-colors">
+      🧊 Jadikan COLD
+    </button>
+
+    <button
+      hx-post="/pipeline/blacklist/{{ prospect.id }}"
+      hx-confirm="Blacklist bisnis ini dari pencarian selanjutnya?"
+      hx-target="#followup-{{ prospect.id }}"
+      hx-swap="outerHTML"
+      class="px-4 border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-sm rounded-lg transition-colors"
+      title="Blacklist Prospect">
+      🚫
+    </button>
+  </div>
+
+</div>

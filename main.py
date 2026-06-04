@@ -1,17 +1,25 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from app.core.database import engine, Base
 from app.api.routes import api_router
+from app.followup.scheduler import init_scheduler
 
-app = FastAPI(title="Client Finder", version="0.1.0")
+# Initialize Database tables
+Base.metadata.create_all(bind=engine)
 
-# Setup static files directory
-static_dir = os.path.join(os.path.dirname(__file__), "app", "static")
-os.makedirs(os.path.join(static_dir, "css"), exist_ok=True)
-os.makedirs(os.path.join(static_dir, "js"), exist_ok=True)
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+app = FastAPI(title="Outreach API")
 
-# Include routers
+# Mount static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+templates = Jinja2Templates(directory="app/templates")
+
+@app.on_event("startup")
+async def startup_event():
+    init_scheduler()
+
 app.include_router(api_router)
 
 if __name__ == "__main__":

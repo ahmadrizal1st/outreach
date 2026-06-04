@@ -76,8 +76,10 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "pitch_angle": score.pitch_angle
         })
 
-    # Follow-ups today (mocked for now since Phase 7 handles full follow-up logic, but we can query Pipeline)
-    followups_today = [] # Leaving empty for phase 4, or implement simple query if needed
+    # Follow-ups summary using Phase 7 logic
+    from app.followup.notifier import FollowupNotifier
+    notifier = FollowupNotifier()
+    summary = notifier.get_summary()
 
     # Providers status
     providers = db.query(LLMProvider).all()
@@ -92,7 +94,7 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db)):
         "request": request,
         "stats": stats,
         "top10": top10,
-        "followups_today": followups_today,
+        "summary": summary,
         "providers": providers,
         "scraper": scraper,
         "contacted_today": contacted_today
