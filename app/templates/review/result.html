@@ -1,0 +1,56 @@
+{% if review.website_status == 'accessible' %}
+<div class="space-y-4 text-sm">
+  <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+    <span class="text-gray-500">Status Akses:</span> 
+    <span class="font-medium text-green-600">✅ Bisa diakses</span>
+  </div>
+  <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+    <span class="text-gray-500">Mobile Friendly:</span> 
+    <span class="font-medium">{{ '✅ Ya' if review.is_mobile_friendly else '❌ Tidak' }}</span>
+  </div>
+  <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+    <span class="text-gray-500">SSL:</span> 
+    <span class="font-medium">{{ '✅ Ya' if review.has_ssl else '❌ Tidak' }}</span>
+  </div>
+  <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+    <span class="text-gray-500">Speed Score:</span> 
+    <span class="font-medium {% if review.speed_score and review.speed_score >= 7 %}text-green-600{% elif review.speed_score and review.speed_score >= 5 %}text-yellow-600{% else %}text-red-600{% endif %}">
+      {{ review.speed_score or 'N/A' }}/10
+    </span>
+  </div>
+
+  <!-- AI Summary -->
+  <div class="bg-indigo-50 rounded-lg p-3 mt-4 border border-indigo-100">
+    <p class="text-xs text-indigo-600 uppercase font-semibold mb-1">🤖 AI Summary</p>
+    <p class="text-gray-700 leading-relaxed text-sm">{{ review.website_summary or 'Tidak ada summary' }}</p>
+  </div>
+
+  <!-- Issues List -->
+  {% if review.website_issues %}
+  <div class="pt-2">
+    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Issues Terdeteksi</p>
+    <ul class="list-disc list-inside text-gray-600 space-y-1 ml-1 text-sm">
+      {% set issues = review.website_issues | replace("'", '"') | string %}
+      {% for issue in issues | replace('[', '') | replace(']', '') | replace('"', '') | split(',') %}
+        {% if issue.strip() %}
+          <li>{{ issue.strip() }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Konfirmasi Manual -->
+  <div class="border-t border-gray-100 pt-4 mt-4">
+    {% include 'review/form.html' %}
+  </div>
+</div>
+{% elif review.website_status == 'no_website' %}
+<div class="text-center py-6 bg-red-50 rounded-lg border border-red-100">
+  <p class="text-red-500 font-medium mb-2">Prospect ini tidak memiliki website yang valid.</p>
+</div>
+{% else %}
+<div class="text-center py-6 bg-yellow-50 rounded-lg border border-yellow-100">
+  <p class="text-yellow-600 font-medium mb-2">Gagal mengakses website: {{ review.website_status }}</p>
+</div>
+{% endif %}

@@ -99,37 +99,29 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Website Review (Placeholder for Phase 5) -->
-    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+    <!-- Website Review -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-full flex flex-col">
       <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
         <span>🌐</span> Review Website
       </h2>
-      {% if review %}
-        <div class="space-y-3 text-sm">
-          <p class="flex justify-between items-center border-b border-gray-50 pb-2">
-            <span class="text-gray-500">Mobile Friendly:</span> 
-            <span class="font-medium">{{ '✅ Ya' if review.is_mobile_friendly else '❌ Tidak' }}</span>
-          </p>
-          <p class="flex justify-between items-center border-b border-gray-50 pb-2">
-            <span class="text-gray-500">SSL:</span> 
-            <span class="font-medium">{{ '✅ Ya' if review.has_ssl else '❌ Tidak' }}</span>
-          </p>
-          <div class="pt-2">
-            <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Opportunity</p>
-            <p class="font-medium text-indigo-700">{{ review.opportunity_type }}</p>
+      <div id="review-container" class="flex-1 flex flex-col">
+        {% if review %}
+          {% include 'review/result.html' %}
+        {% else %}
+          <div class="flex-1 flex items-center justify-center text-center py-6">
+            <div>
+              {% if not prospect.website %}
+                <p class="text-sm text-gray-500 mb-4">Prospect ini tidak memiliki website.</p>
+              {% else %}
+                <p class="text-sm text-gray-500 mb-4">Belum ada hasil scan website.</p>
+                <button hx-post="/review/{{ prospect.id }}" hx-target="#review-container" class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 rounded-lg transition-colors text-sm" onclick="this.innerHTML='<span class=\'animate-pulse\'>Menganalisis...</span>'">
+                  🔍 Scan Website Sekarang
+                </button>
+              {% endif %}
+            </div>
           </div>
-          <div class="bg-gray-50 rounded-lg p-3 mt-2 border border-gray-100">
-            <p class="text-gray-600 text-xs leading-relaxed">{{ review.opportunity_notes }}</p>
-          </div>
-        </div>
-      {% else %}
-        <div class="text-center py-6">
-          <p class="text-sm text-gray-500 mb-4">Belum ada hasil scan website.</p>
-          <button class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 rounded-lg transition-colors text-sm" onclick="alert('Website review feature is coming in Phase 5')">
-            🔍 Scan Website
-          </button>
-        </div>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
 
     <!-- Pesan & WA Link (Placeholder for Phase 6) -->

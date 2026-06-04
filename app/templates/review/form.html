@@ -1,0 +1,40 @@
+<p class="text-xs text-gray-500 uppercase font-semibold mb-3">✍️ Konfirmasi Manual</p>
+<form hx-post="/review/manual/{{ prospect_id }}" hx-target="#review-container" class="space-y-3">
+  <div>
+    <label class="block text-xs font-medium text-gray-700 mb-1">Peluang (Opportunity)</label>
+    <select name="opportunity_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <option value="remake" {% if review.opportunity_type == 'remake' %}selected{% endif %}>Remake</option>
+      <option value="redesign" {% if review.opportunity_type == 'redesign' %}selected{% endif %}>Redesign</option>
+      <option value="optimasi" {% if review.opportunity_type == 'optimasi' %}selected{% endif %}>Optimasi</option>
+      <option value="none" {% if review.opportunity_type == 'none' %}selected{% endif %}>None (Sudah OK)</option>
+    </select>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Nilai (Value)</label>
+      <select name="estimated_value" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="low" {% if review.estimated_value == 'low' %}selected{% endif %}>Low</option>
+        <option value="medium" {% if review.estimated_value == 'medium' %}selected{% endif %}>Medium</option>
+        <option value="high" {% if review.estimated_value == 'high' %}selected{% endif %}>High</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Urgensi</label>
+      <select name="urgency" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="low" {% if review.urgency == 'low' %}selected{% endif %}>Low</option>
+        <option value="medium" {% if review.urgency == 'medium' %}selected{% endif %}>Medium</option>
+        <option value="high" {% if review.urgency == 'high' %}selected{% endif %}>High</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs font-medium text-gray-700 mb-1">Catatan</label>
+    <textarea name="opportunity_notes" rows="2" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50">{{ review.opportunity_notes }}</textarea>
+  </div>
+
+  <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition-colors mt-2">
+    💾 Simpan Review & Update Skor
+  </button>
+</form>
