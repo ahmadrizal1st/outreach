@@ -51,6 +51,18 @@ class ScraperProgress(Base):
     scraped_at = Column(DateTime, default=func.now())
     status = Column(String, default="completed")
 
+class ScraperSession(Base):
+    """Log detail per sesi scraping (Item 46)."""
+    __tablename__ = "scraper_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    started_at = Column(DateTime, default=func.now())
+    completed_at = Column(DateTime)
+    status = Column(String, default="running")
+    total_processed = Column(Integer, default=0)
+    total_saved = Column(Integer, default=0)
+    error_message = Column(String)
+
 class AppSetting(Base):
     """Key-value store untuk konfigurasi aplikasi yang bisa diubah dari UI."""
     __tablename__ = "app_settings"

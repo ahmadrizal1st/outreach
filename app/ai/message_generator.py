@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from urllib.parse import quote
 from sqlalchemy.orm import Session
 from app.ai.provider import LLMProvider
@@ -102,7 +103,6 @@ class MessageGenerator:
         return f"https://wa.me/{phone}?text={encoded}"
 
     def mark_as_sent(self, message_id: int):
-        from datetime import datetime
         msg = self.db.query(Message).filter(Message.id == message_id).first()
         if msg:
             msg.status = 'sent'

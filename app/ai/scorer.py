@@ -1,3 +1,4 @@
+from sqlalchemy.sql import func
 import json
 from sqlalchemy.orm import Session
 from app.ai.provider import LLMProvider
@@ -99,6 +100,5 @@ class BusinessScorer:
         prospect = self._get_prospect(prospect_id)
         if prospect:
             prospect.status = status
-            from sqlalchemy.sql import func
             prospect.updated_at = func.now()
             self.db.commit()

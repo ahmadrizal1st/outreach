@@ -26,7 +26,7 @@ class MapsScraper:
     def _profile_exists(self):
         return os.path.exists("browser_profile.json")
 
-    def _normalize(self, raw_data):
+    def _normalize(self, raw_data: dict) -> dict:
         raw_data['phone_normalized'] = self.normalizer.normalize_phone(raw_data.get('phone_raw'))
         raw_data['rating'] = self.normalizer.normalize_rating(raw_data.get('rating'))
         raw_data['review_count'] = self.normalizer.normalize_review_count(raw_data.get('review_count'))
@@ -128,7 +128,7 @@ class MapsScraper:
                 prev_count = len(listings)
                 attempts += 1
 
-    def _random_user_agent(self):
+    def _random_user_agent(self) -> str:
         agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

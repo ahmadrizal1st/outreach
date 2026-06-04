@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import templates
-from app.models.prospect import Prospect, ProspectScore, Pipeline
+from app.models.prospect import Prospect, ProspectScore, Pipeline, WebsiteReview, Message
 from app.scraper.normalizer import DataNormalizer
 
 logger = logging.getLogger(__name__)
@@ -163,7 +163,6 @@ async def edit_prospect_form(request: Request, prospect_id: int, db: Session = D
 
 @router.get("/{prospect_id}", response_class=HTMLResponse)
 async def prospect_detail(request: Request, prospect_id: int, db: Session = Depends(get_db)):
-from app.models.prospect import WebsiteReview, Message
     prospect = db.query(Prospect).filter(Prospect.id == prospect_id).first()
     if not prospect:
         return RedirectResponse("/prospects", status_code=302)
@@ -260,7 +259,6 @@ async def update_prospect(
 
 @router.post("/{prospect_id}/delete", response_class=HTMLResponse)
 async def delete_prospect(request: Request, prospect_id: int, db: Session = Depends(get_db)):
-from app.models.prospect import ProspectScore, Pipeline, WebsiteReview, Message
 
     db.query(Message).filter(Message.prospect_id == prospect_id).delete()
     db.query(WebsiteReview).filter(WebsiteReview.prospect_id == prospect_id).delete()

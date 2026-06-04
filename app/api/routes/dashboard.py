@@ -1,3 +1,4 @@
+from app.followup.notifier import FollowupNotifier
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
@@ -66,7 +67,6 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "pitch_angle": score.pitch_angle
         })
 
-    from app.followup.notifier import FollowupNotifier
     notifier = FollowupNotifier()
     summary = notifier.get_summary()
 

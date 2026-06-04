@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.core.dependencies import templates
 from app.followup.tracker import FollowupTracker
 from app.followup.notifier import FollowupNotifier
+from app.models.prospect import Prospect, Pipeline, ProspectScore
 
 router = APIRouter()
 
@@ -26,7 +27,6 @@ async def mark_followup_sent(request: Request, prospect_id: int, db: Session = D
     tracker = FollowupTracker()
     tracker.mark_followup_sent(prospect_id)
 
-from app.models.prospect import Prospect, Pipeline, ProspectScore
     result = db.query(Prospect, Pipeline, ProspectScore).join(
         Pipeline, Prospect.id == Pipeline.prospect_id
     ).join(

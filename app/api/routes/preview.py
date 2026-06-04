@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import templates
 from app.models.prospect import Prospect, ProspectScore, WebsiteReview
+from app.models.settings import AppSetting
 from app.ai.provider import LLMProvider
 from app.ai.prompts.preview_content import get_preview_content_prompt
 
@@ -110,7 +111,6 @@ async def view_preview(request: Request, prospect_id: int, db: Session = Depends
         data = {}
 
     # We also pass the app settings (Agency Profile) to make the footer look authentic
-from app.models.settings import AppSetting
     settings_rows = db.query(AppSetting).all()
     app_settings = {r.key: r.value for r in settings_rows}
 

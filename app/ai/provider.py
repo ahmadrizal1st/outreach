@@ -1,3 +1,4 @@
+from datetime import datetime
 import json as _json
 import random
 from datetime import date
@@ -5,7 +6,7 @@ from litellm import completion
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, asc
 
-from app.models.settings import LLMProvider as LLMProviderModel
+from app.models.settings import LLMProvider as LLMProviderModel, AppSetting
 
 class LLMProvider:
     def __init__(self, db: Session, manual_provider: str = None):
@@ -20,8 +21,6 @@ class LLMProvider:
             return self._get_provider(self.manual_provider)
 
         # Jika tidak, baca dari AppSetting
-from app.models.settings import AppSetting
-        
         mode_setting = self.db.query(AppSetting).filter(AppSetting.key == "llm_mode").first()
         llm_mode = mode_setting.value if mode_setting else "auto"
 
@@ -69,8 +68,7 @@ from app.models.settings import AppSetting
         self.last_used_model = provider.model_name
 
         try:
-            
-                extra_headers = {}
+            extra_headers = {}
             if provider.extra_headers:
                 try:
                     extra_headers = _json.loads(provider.extra_headers)
@@ -152,7 +150,6 @@ from app.models.settings import AppSetting
             if provider.tokens_used_today is None:
                 provider.tokens_used_today = 0
             provider.tokens_used_today += tokens
-            from datetime import datetime
             provider.last_used_at = datetime.utcnow()
             self.db.commit()
 
@@ -163,7 +160,6 @@ from app.models.settings import AppSetting
             self.db.commit()
 
     def _reset_daily_tokens_if_needed(self):
-        from datetime import date
         today = date.today()
         
         providers = self.db.query(LLMProviderModel).filter(
