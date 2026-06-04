@@ -92,6 +92,7 @@ class Message(Base):
     prospect_id = Column(Integer, ForeignKey("prospects.id"))
     sequence = Column(Integer, default=0)
     content = Column(String)
+    tone = Column(String)
     provider_used = Column(String)
     model_used = Column(String)
     generated_at = Column(DateTime, default=func.now())
