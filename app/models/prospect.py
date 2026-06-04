@@ -134,18 +134,7 @@ class Pipeline(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
-class Preview(Base):
-    __tablename__ = "previews"
 
-    id = Column(Integer, primary_key=True, index=True)
-    prospect_id = Column(Integer, ForeignKey("prospects.id"))
-    file_path = Column(String)
-    industry_template = Column(String)
-    generated_at = Column(DateTime, default=func.now())
-    expired_at = Column(Date)
-    open_count = Column(Integer, default=0)
-    last_opened_at = Column(DateTime)
-    status = Column(String, default="active")
 
 
 class LLMProvider(Base):

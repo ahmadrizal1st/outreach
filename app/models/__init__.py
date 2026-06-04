@@ -1,4 +1,4 @@
 from .prospect import (
     Prospect, ProspectScore, WebsiteReview, Message, Followup,
-    Pipeline, Preview, LLMProvider, ScraperConfig, ScraperProgress
+    Pipeline, LLMProvider, ScraperConfig, ScraperProgress
 )
