@@ -1,18 +1,15 @@
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import datetime
-import os
 
 from app.core.database import get_db
+from app.core.dependencies import templates
 from app.models.prospect import ProspectScore, WebsiteReview
 from app.scraper.website_analyzer import WebsiteAnalyzer
 
 router = APIRouter()
 
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 @router.post("/{prospect_id}", response_class=HTMLResponse)
 async def scan_website(

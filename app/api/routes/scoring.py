@@ -4,7 +4,8 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.ai.scorer import BusinessScorer
-from app.models.prospect import LLMProvider, ProspectScore, Prospect
+from app.models.prospect import ProspectScore, Prospect
+from app.models.settings import LLMProvider
 
 router = APIRouter()
 

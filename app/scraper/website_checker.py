@@ -24,15 +24,30 @@ class WebsiteChecker:
             url = "https://" + url
 
         try:
+            # Try with SSL verification first
             async with httpx.AsyncClient(
                 timeout=self.timeout,
                 follow_redirects=True,
-                verify=False 
+                verify=True 
             ) as client:
                 response = await client.get(
                     url,
-                    headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
+                    headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
                 )
+        except httpx.ConnectError as e:
+            if "SSL" in str(e) or "certificate verify failed" in str(e):
+                # Fallback to verify=False only if SSL error
+                async with httpx.AsyncClient(
+                    timeout=self.timeout,
+                    follow_redirects=True,
+                    verify=False 
+                ) as client:
+                    response = await client.get(
+                        url,
+                        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+                    )
+            else:
+                raise
 
                 final_url = str(response.url)
                 result["has_ssl"] = final_url.startswith("https")
@@ -97,6 +112,6 @@ class WebsiteChecker:
             result["website_status"] = "error"
         except Exception as e:
             result["website_status"] = "error"
-            print(f"Error checking {url}: {e}")
+            logger.error(f"Error checking {url}: {e}")
 
         return result

@@ -3,9 +3,11 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.prospect import Prospect, Pipeline, ProspectScore
 
+from sqlalchemy.orm import Session
+
 class FollowupTracker:
-    def __init__(self):
-        self.db = next(get_db())
+    def __init__(self, db: Session):
+        self.db = db
         self.interval_days = settings.FOLLOWUP_INTERVAL_DAYS
         self.max_followup = settings.MAX_FOLLOWUP
 

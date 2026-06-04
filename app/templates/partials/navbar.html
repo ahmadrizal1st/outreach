@@ -6,10 +6,12 @@
     </span>
     
     <div class="flex gap-6 text-sm font-medium">
-      <a href="/" class="text-gray-700 hover:text-indigo-600">Dashboard</a>
-      <a href="/prospects" class="text-gray-700 hover:text-indigo-600">Prospects</a>
-      <a href="/pipeline" class="text-gray-700 hover:text-indigo-600">Pipeline</a>
-      <a href="/settings" class="text-gray-700 hover:text-indigo-600">Settings</a>
+      {% set current_path = request.url.path if request else '/' %}
+      <a href="/" class="{% if current_path == '/' %}text-indigo-600 font-bold{% else %}text-gray-700 hover:text-indigo-600{% endif %}">Dashboard</a>
+      <a href="/scraper" class="{% if current_path.startswith('/scraper') %}text-indigo-600 font-bold{% else %}text-gray-700 hover:text-indigo-600{% endif %}">Scraper</a>
+      <a href="/prospects" class="{% if current_path.startswith('/prospects') %}text-indigo-600 font-bold{% else %}text-gray-700 hover:text-indigo-600{% endif %}">Prospects</a>
+      <a href="/pipeline" class="{% if current_path.startswith('/pipeline') %}text-indigo-600 font-bold{% else %}text-gray-700 hover:text-indigo-600{% endif %}">Pipeline</a>
+      <a href="/settings" class="{% if current_path.startswith('/settings') %}text-indigo-600 font-bold{% else %}text-gray-700 hover:text-indigo-600{% endif %}">Settings</a>
     </div>
   </div>
 </nav>

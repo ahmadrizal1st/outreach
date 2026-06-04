@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from playwright.async_api import Page
 
 class DetailParser:
@@ -52,7 +55,8 @@ class DetailParser:
             el = await page.query_selector(selector)
             if el:
                 return await el.inner_text()
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             pass
         return None
 
@@ -61,7 +65,8 @@ class DetailParser:
             el = await page.query_selector(selector)
             if el:
                 return await el.get_attribute(attr)
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             pass
         return None
 
@@ -79,7 +84,8 @@ class DetailParser:
                     time = await cells[1].inner_text()
                     hours[day.strip()] = time.strip()
             return str(hours) if hours else None
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             return None
 
     async def _get_photos(self, page):
@@ -93,7 +99,8 @@ class DetailParser:
                 if src:
                     photos.append(src)
             return str(photos)
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             return None
 
     async def _check_is_claimed(self, page):
@@ -102,7 +109,8 @@ class DetailParser:
             if "Klaim bisnis ini" in content or "Own this business?" in content or "Claim this business" in content:
                 return False
             return True
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             return True
 
     async def _get_instagram(self, page):
@@ -112,7 +120,8 @@ class DetailParser:
                 href = await link.get_attribute('href')
                 if href and 'instagram.com' in href:
                     return href
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             pass
         return None
 
@@ -121,6 +130,7 @@ class DetailParser:
             summary_el = await page.query_selector('div.PYvSYb')
             if summary_el:
                 return await summary_el.inner_text()
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             pass
         return None

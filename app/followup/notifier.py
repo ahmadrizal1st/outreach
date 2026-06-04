@@ -3,9 +3,11 @@ from sqlalchemy import func
 from app.core.database import get_db
 from app.models.prospect import Pipeline, ProspectScore
 
+from sqlalchemy.orm import Session
+
 class FollowupNotifier:
-    def __init__(self):
-        self.db = next(get_db())
+    def __init__(self, db: Session):
+        self.db = db
 
     def get_summary(self) -> dict:
         return {

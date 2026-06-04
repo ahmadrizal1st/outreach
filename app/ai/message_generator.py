@@ -126,7 +126,7 @@ class MessageGenerator:
             data = json.loads(clean)
             return data.get('variants', [])
         except Exception as e:
-            print(f"Failed to parse variants: {e}")
+            logger.error(f"Failed to parse variants: {e}")
             return []
 
     def _save_variants(self, prospect_id: int, variants: list, sequence: int) -> list:

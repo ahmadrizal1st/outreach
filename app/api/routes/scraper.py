@@ -6,18 +6,16 @@ import logging
 from datetime import datetime
 from fastapi import APIRouter, Request, Depends, Form, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-import os
 
 from app.core.database import get_db
-from app.models.prospect import ScraperConfig, ScraperProgress, Prospect
+from app.core.dependencies import templates
+from app.models.prospect import Prospect
+from app.models.settings import ScraperConfig, ScraperProgress
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 scraper_state = {
     "running": False,

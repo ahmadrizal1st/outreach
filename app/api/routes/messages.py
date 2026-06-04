@@ -1,17 +1,14 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-import os
 
 from app.core.database import get_db
+from app.core.dependencies import templates
 from app.ai.message_generator import MessageGenerator
 from app.models.prospect import Message, Prospect
 
 router = APIRouter()
 
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 @router.post("/generate/{prospect_id}", response_class=HTMLResponse)
 async def generate_first_message(

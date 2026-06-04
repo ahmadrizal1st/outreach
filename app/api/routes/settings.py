@@ -4,18 +4,15 @@ Settings route — renders full settings page with all configurations.
 import logging
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-import os
 
 from app.core.database import get_db
-from app.models.prospect import LLMProvider, ScraperConfig, AppSetting
+from app.core.dependencies import templates
+from app.models.settings import LLMProvider, ScraperConfig, AppSetting
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 def _get_settings_dict(db: Session) -> dict:
     """Load all app settings into a flat key-value dict."""

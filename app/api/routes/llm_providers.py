@@ -8,18 +8,15 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-import os
 
 from app.core.database import get_db
-from app.models.prospect import LLMProvider
+from app.core.dependencies import templates
+from app.models.settings import LLMProvider
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 def _provider_to_dict(p: LLMProvider) -> dict:
     return {

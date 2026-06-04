@@ -2,11 +2,10 @@ import json
 import logging
 from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-import os
 
 from app.core.database import get_db
+from app.core.dependencies import templates
 from app.models.prospect import Prospect, ProspectScore, WebsiteReview
 from app.ai.provider import LLMProvider
 from app.ai.prompts.preview_content import get_preview_content_prompt
@@ -14,8 +13,6 @@ from app.ai.prompts.preview_content import get_preview_content_prompt
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 
 @router.post("/generate/{prospect_id}", response_class=HTMLResponse)
@@ -113,7 +110,7 @@ async def view_preview(request: Request, prospect_id: int, db: Session = Depends
         data = {}
 
     # We also pass the app settings (Agency Profile) to make the footer look authentic
-    from app.models.prospect import AppSetting
+from app.models.settings import AppSetting
     settings_rows = db.query(AppSetting).all()
     app_settings = {r.key: r.value for r in settings_rows}
 

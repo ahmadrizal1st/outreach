@@ -4,7 +4,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.core.database import SessionLocal
 from tests.fixtures.prospect_sample import SAMPLE_PROSPECT, SAMPLE_PROSPECT_WITH_WEBSITE
-from app.models.prospect import Prospect, LLMProvider, ScraperConfig
+from app.models.prospect import Prospect
+from app.models.settings import LLMProvider, ScraperConfig
 
 def seed():
     db = SessionLocal()

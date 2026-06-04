@@ -6,7 +6,8 @@ load_dotenv()
 
 class Settings:
     
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/client_finder.db")
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/database.sqlite")
+    SECRET_KEY = os.getenv("SECRET_KEY", "super_secret_fallback_key_123")
 
     FOLLOWUP_INTERVAL_DAYS: int = int(os.getenv("FOLLOWUP_INTERVAL_DAYS", 3))
     MAX_FOLLOWUP: int = int(os.getenv("MAX_FOLLOWUP", 2))

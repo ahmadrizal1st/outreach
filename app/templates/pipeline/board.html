@@ -2,59 +2,143 @@
 {% block content %}
 
 <div class="mb-6 flex justify-between items-center">
-  <h1 class="text-2xl font-bold text-gray-900">Pipeline Board</h1>
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900"><i class="fa-solid fa-columns text-indigo-500"></i> Pipeline Board</h1>
+    <p class="text-sm text-gray-500 mt-1">Geser kartu antar kolom untuk update status prospect secara otomatis.</p>
+  </div>
+  <div class="text-xs text-gray-400 flex items-center gap-1">
+    <i class="fa-solid fa-grip-dots-vertical"></i> Drag &amp; drop aktif
+  </div>
 </div>
 
-<div class="flex gap-4 overflow-x-auto pb-4 items-start snap-x snap-mandatory">
+<div class="flex gap-4 overflow-x-auto pb-6 items-start snap-x snap-mandatory">
   {% for column in pipeline_columns %}
-  <div class="flex-shrink-0 w-80 bg-gray-100 rounded-xl p-3 border border-gray-200 snap-center shadow-sm">
+  <div class="flex-shrink-0 w-72 bg-gray-100 rounded-2xl p-3 border border-gray-200 snap-center shadow-sm"
+       data-col-id="{{ column.id }}">
+
+    <!-- Column header -->
     <div class="flex justify-between items-center mb-3 px-1">
       <h3 class="font-semibold text-gray-700 text-sm flex items-center gap-2">
-        <span>{{ column.icon }}</span> {{ column.label }}
+        <i class="{{ column.icon }} text-indigo-400"></i> {{ column.label }}
       </h3>
-      <span class="bg-white text-gray-600 px-2 py-0.5 rounded-full text-xs font-medium shadow-sm">
+      <span class="bg-white text-gray-600 px-2 py-0.5 rounded-full text-xs font-medium shadow-sm pipeline-count"
+            id="count-{{ column.id }}">
         {{ column.count }}
       </span>
     </div>
 
-    <div class="space-y-3 min-h-[50vh]">
+    <!-- Drop zone -->
+    <div class="space-y-2 min-h-[60vh] kanban-column"
+         id="col-{{ column.id }}"
+         data-status="{{ column.id }}">
+
       {% for prospect in column.prospects %}
-      <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:border-indigo-300 hover:shadow-md transition-all">
-        <p class="font-medium text-gray-900 text-sm truncate" title="{{ prospect.name }}">{{ prospect.name }}</p>
-        <p class="text-xs text-gray-500 mt-1 flex gap-2">
-          <span class="truncate">{{ prospect.category }}</span> &middot; 
-          <span class="truncate">{{ prospect.city }}</span>
-        </p>
-        
+      <div class="prospect-card bg-white rounded-xl p-3 shadow-sm border border-gray-100
+                  hover:border-indigo-300 hover:shadow-md transition-all cursor-grab active:cursor-grabbing
+                  select-none"
+           data-id="{{ prospect.id }}"
+           data-status="{{ column.id }}">
+
+        <!-- Priority badge -->
         {% if prospect.priority_tier %}
-        <div class="mt-2">
-          <span class="inline-flex text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded
-            {% if prospect.priority_tier == 'HOT' %}bg-red-50 text-red-700
-            {% elif prospect.priority_tier == 'WARM' %}bg-yellow-50 text-yellow-700
-            {% else %}bg-gray-50 text-gray-600{% endif %}">
+        <div class="mb-1">
+          <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full
+            {% if prospect.priority_tier == 'HOT' %}bg-red-100 text-red-700
+            {% elif prospect.priority_tier == 'WARM' %}bg-amber-100 text-amber-700
+            {% else %}bg-gray-100 text-gray-500{% endif %}">
+            {% if prospect.priority_tier == 'HOT' %}🔥{% elif prospect.priority_tier == 'WARM' %}⚡{% else %}❄️{% endif %}
             {{ prospect.priority_tier }}
+            {% if prospect.priority_score %}<span class="opacity-70 font-normal normal-case">({{ "%.0f"|format(prospect.priority_score) }})</span>{% endif %}
           </span>
         </div>
         {% endif %}
 
+        <p class="font-semibold text-gray-900 text-sm truncate" title="{{ prospect.name }}">{{ prospect.name }}</p>
+        <p class="text-xs text-gray-500 mt-0.5 flex gap-1 items-center">
+          <i class="fa-solid fa-tag text-gray-300 text-[9px]"></i>
+          <span class="truncate">{{ prospect.category or '—' }}</span>
+          <span class="text-gray-300">·</span>
+          <span class="truncate">{{ prospect.city or '—' }}</span>
+        </p>
+
         {% if prospect.next_followup_date %}
-        <p class="text-orange-500 text-[10px] font-semibold mt-2 uppercase tracking-wide">
-          <i class="fa-solid fa-calendar"></i> Follow-up: {{ prospect.next_followup_date }}
+        <p class="text-orange-500 text-[10px] font-semibold mt-1.5 flex items-center gap-1">
+          <i class="fa-solid fa-calendar-clock"></i> Follow-up: {{ prospect.next_followup_date }}
         </p>
         {% endif %}
 
-        <div class="mt-3 pt-2 border-t border-gray-50 text-right">
-          <a href="/prospects/{{ prospect.id }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Lihat Detail &rarr;</a>
+        <div class="mt-2 pt-2 border-t border-gray-50 text-right">
+          <a href="/prospects/{{ prospect.id }}"
+             class="text-indigo-600 hover:text-indigo-800 text-xs font-medium inline-flex items-center gap-1">
+            Detail <i class="fa-solid fa-arrow-right text-[9px]"></i>
+          </a>
         </div>
       </div>
       {% else %}
-      <div class="h-16 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50">
-        <p class="text-xs text-gray-400 font-medium">Kosong</p>
+      <div class="drop-placeholder h-16 flex items-center justify-center border-2 border-dashed border-gray-200
+                  rounded-xl bg-gray-50/50">
+        <p class="text-xs text-gray-400 font-medium">Kosong — lepas kartu di sini</p>
       </div>
       {% endfor %}
     </div>
   </div>
   {% endfor %}
 </div>
+
+<!-- Drag & Drop Logic (Item 14) -->
+<script>
+document.querySelectorAll('.kanban-column').forEach(function(col) {
+  Sortable.create(col, {
+    group: 'pipeline',          // same group = cards can move between columns
+    animation: 180,
+    ghostClass: 'sortable-ghost',
+    dragClass: 'sortable-drag',
+    handle: '.prospect-card',
+    onEnd: function(evt) {
+      const cardEl   = evt.item;
+      const prospectId = cardEl.dataset.id;
+      const newStatus  = evt.to.dataset.status;
+      const oldStatus  = evt.from.dataset.status;
+
+      if (newStatus === oldStatus) return; // Same column, no-op
+
+      // POST ke backend via HTMX-style fetch
+      const formData = new FormData();
+      formData.append('status', newStatus);
+
+      fetch('/pipeline/status/' + prospectId, {
+        method: 'POST',
+        body: formData,
+      }).then(function(res) {
+        if (res.ok) {
+          // Update counts
+          const fromCount = document.getElementById('count-' + oldStatus);
+          const toCount   = document.getElementById('count-' + newStatus);
+          if (fromCount) fromCount.textContent = parseInt(fromCount.textContent || 0) - 1;
+          if (toCount)   toCount.textContent   = parseInt(toCount.textContent   || 0) + 1;
+          // Remove placeholder if column now has items
+          const placeholder = evt.to.querySelector('.drop-placeholder');
+          if (placeholder && evt.to.querySelectorAll('.prospect-card').length > 0) {
+            placeholder.remove();
+          }
+          window.showToast && window.showToast('Status diperbarui ke "' + newStatus.replace(/_/g, ' ') + '"', 'success');
+        } else {
+          // Revert card back to original column on failure
+          evt.from.insertBefore(cardEl, evt.from.children[evt.oldIndex]);
+          window.showToast && window.showToast('Gagal memperbarui status', 'error');
+        }
+      }).catch(function() {
+        evt.from.insertBefore(cardEl, evt.from.children[evt.oldIndex]);
+        window.showToast && window.showToast('Koneksi gagal', 'error');
+      });
+    }
+  });
+});
+</script>
+
+<style>
+.sortable-ghost  { opacity: 0.35; border: 2px dashed #6366f1 !important; background: #eef2ff !important; }
+.sortable-drag   { box-shadow: 0 20px 40px rgba(0,0,0,0.18) !important; transform: rotate(2deg); }
+</style>
 
 {% endblock %}

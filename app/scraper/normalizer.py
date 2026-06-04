@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import re
 
 class DataNormalizer:
@@ -19,7 +22,8 @@ class DataNormalizer:
             return None
         try:
             return float(str(rating).replace(',', '.'))
-        except:
+        except Exception as e:
+            logger.debug(f"Parsing error: {e}")
             return None
 
     def normalize_review_count(self, count: str) -> int:

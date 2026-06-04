@@ -30,9 +30,28 @@
         </div>
         <p class="text-xs text-gray-500 mt-1">
           API Key: <span class="font-mono">{{ p.api_key_masked }}</span>
-          &nbsp;·&nbsp; Token hari ini: <strong>{{ p.tokens_used_today }}</strong>/{{ p.daily_token_limit or '∞' }}
           &nbsp;·&nbsp; Prioritas: {{ p.priority_order }}
         </p>
+        
+        <!-- Item 12: Token Usage Progress Bar -->
+        <div class="mt-3">
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-gray-500">Token hari ini</span>
+            <span class="font-medium {% if p.daily_token_limit and p.tokens_used_today >= p.daily_token_limit * 0.8 %}text-orange-600{% else %}text-gray-700{% endif %}">
+              {{ "{:,}".format(p.tokens_used_today or 0) }} / {% if p.daily_token_limit %}{{ "{:,}".format(p.daily_token_limit) }}{% else %}∞{% endif %}
+            </span>
+          </div>
+          {% if p.daily_token_limit %}
+          {% set usage_pct = (p.tokens_used_today / p.daily_token_limit * 100) if p.daily_token_limit > 0 else 0 %}
+          {% set usage_pct = usage_pct if usage_pct <= 100 else 100 %}
+          <div class="w-full bg-gray-200 rounded-full h-1.5">
+            <div class="h-1.5 rounded-full {% if usage_pct >= 90 %}bg-red-500{% elif usage_pct >= 75 %}bg-orange-500{% else %}bg-green-500{% endif %}" style="width: {{ usage_pct }}%"></div>
+          </div>
+          {% if usage_pct >= 80 %}
+          <p class="text-[10px] text-orange-600 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Mendekati limit harian</p>
+          {% endif %}
+          {% endif %}
+        </div>
         {% if p.notes %}
         <p class="text-xs text-gray-400 mt-1 italic">{{ p.notes }}</p>
         {% endif %}

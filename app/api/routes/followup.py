@@ -1,16 +1,13 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-import os
 
 from app.core.database import get_db
+from app.core.dependencies import templates
 from app.followup.tracker import FollowupTracker
 from app.followup.notifier import FollowupNotifier
 
 router = APIRouter()
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 @router.get("/today", response_class=HTMLResponse)
 async def get_followups_today(request: Request, db: Session = Depends(get_db)):
@@ -29,7 +26,7 @@ async def mark_followup_sent(request: Request, prospect_id: int, db: Session = D
     tracker = FollowupTracker()
     tracker.mark_followup_sent(prospect_id)
 
-    from app.models.prospect import Prospect, Pipeline, ProspectScore
+from app.models.prospect import Prospect, Pipeline, ProspectScore
     result = db.query(Prospect, Pipeline, ProspectScore).join(
         Pipeline, Prospect.id == Pipeline.prospect_id
     ).join(

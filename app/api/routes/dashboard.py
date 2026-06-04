@@ -1,18 +1,16 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date
-import os
 
 from app.core.database import get_db
-from app.models.prospect import Prospect, ProspectScore, LLMProvider, Pipeline
+from app.core.dependencies import templates
+from app.models.prospect import Prospect, ProspectScore, Pipeline
+from app.models.settings import LLMProvider
 
 router = APIRouter()
 
-templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 @router.get("/", response_class=HTMLResponse)
 async def read_dashboard(request: Request, db: Session = Depends(get_db)):

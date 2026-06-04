@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.scraper.maps_scraper import MapsScraper
-from app.models.prospect import Prospect, ScraperConfig, ScraperProgress
+from app.models.prospect import Prospect
+from app.models.settings import ScraperConfig, ScraperProgress
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class ScraperRunner:
 
         config.max_per_day = max_results
 
-        scraper = MapsScraper(config)
+        scraper = MapsScraper(config, self.db)
 
         results = await scraper.scrape(
             keyword=keyword,

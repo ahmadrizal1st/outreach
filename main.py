@@ -29,6 +29,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Outreach API", lifespan=lifespan)
 
+from app.core.security import BasicAuthMiddleware, CSRFMiddleware
+app.add_middleware(CSRFMiddleware)
+app.add_middleware(BasicAuthMiddleware)
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="app/templates")
@@ -37,6 +41,10 @@ app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
 
 app.include_router(api_router)
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "version": "1.0.0"}
 
 if __name__ == "__main__":
     import uvicorn

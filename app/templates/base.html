@@ -4,18 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Finder</title>
-  
+
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SortableJS untuk drag-and-drop pipeline board (Item 14) -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-  {% include 'partials/navbar.html' %}
+  <!-- Global HTMX Loading Overlay (Item 17) -->
+  <div id="htmx-loading-overlay"
+       class="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[1px] flex items-center justify-center hidden"
+       aria-label="Memproses...">
+    <div class="bg-white rounded-2xl shadow-2xl px-8 py-6 flex items-center gap-4">
+      <svg class="animate-spin h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <span class="text-gray-700 font-medium text-sm" id="htmx-loading-msg">Memproses...</span>
+    </div>
+  </div>
 
+  <!-- Toast Notification Container (bonus) -->
+  <div id="toast-container" class="fixed top-4 right-4 z-[9998] flex flex-col gap-2 pointer-events-none"></div>
+
+  {% include 'partials/navbar.html' %}
   {% include 'partials/notification.html' %}
 
   <main class="max-w-7xl mx-auto px-4 py-6">
@@ -23,5 +38,55 @@
   </main>
 
   <script src="/static/js/main.js"></script>
+
+  <!-- HTMX global event hooks (Item 17) -->
+  <script>
+    const overlay = document.getElementById('htmx-loading-overlay');
+    const loadingMsg = document.getElementById('htmx-loading-msg');
+
+    // Slow-request threshold: show overlay only if request takes > 300ms
+    let loadingTimer = null;
+
+    document.addEventListener('htmx:beforeRequest', function(evt) {
+      const el = evt.detail.elt;
+      const msg = el.getAttribute('data-loading-msg') || 'Memproses...';
+      loadingMsg.textContent = msg;
+      loadingTimer = setTimeout(() => overlay.classList.remove('hidden'), 300);
+    });
+
+    document.addEventListener('htmx:afterRequest', function() {
+      if (loadingTimer) clearTimeout(loadingTimer);
+      overlay.classList.add('hidden');
+    });
+
+    document.addEventListener('htmx:responseError', function(evt) {
+      if (loadingTimer) clearTimeout(loadingTimer);
+      overlay.classList.add('hidden');
+      showToast('⚠️ Terjadi error: ' + (evt.detail.xhr.status || 'Unknown'), 'error');
+    });
+
+    // Toast helper
+    function showToast(msg, type = 'success') {
+      const colors = {
+        success: 'bg-green-600 text-white',
+        error:   'bg-red-600 text-white',
+        info:    'bg-indigo-600 text-white',
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all transform translate-x-0 ${colors[type] || colors.success}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // Expose globally so templates can call it
+    window.showToast = showToast;
+
+    // HTMX after-swap: show success toast if hx-success-msg attribute is set
+    document.addEventListener('htmx:afterSwap', function(evt) {
+      const msg = evt.detail.elt.getAttribute('hx-success-msg');
+      if (msg) showToast(msg, 'success');
+    });
+  </script>
 </body>
 </html>

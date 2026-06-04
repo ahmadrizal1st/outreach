@@ -1,10 +1,11 @@
+import json as _json
 import random
 from datetime import date
 from litellm import completion
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, asc
 
-from app.models.prospect import LLMProvider as LLMProviderModel
+from app.models.settings import LLMProvider as LLMProviderModel
 
 class LLMProvider:
     def __init__(self, db: Session, manual_provider: str = None):
@@ -14,8 +15,24 @@ class LLMProvider:
         self.last_used_model = None
 
     def get_active_provider(self):
+        # Override dengan parameter function jika ada
         if self.manual_provider:
             return self._get_provider(self.manual_provider)
+
+        # Jika tidak, baca dari AppSetting
+from app.models.settings import AppSetting
+        
+        mode_setting = self.db.query(AppSetting).filter(AppSetting.key == "llm_mode").first()
+        llm_mode = mode_setting.value if mode_setting else "auto"
+
+        if llm_mode == "manual":
+            provider_setting = self.db.query(AppSetting).filter(AppSetting.key == "manual_provider_id").first()
+            if provider_setting and provider_setting.value:
+                provider = self.db.query(LLMProviderModel).filter(LLMProviderModel.id == int(provider_setting.value)).first()
+                if provider and provider.is_active:
+                    return provider
+        
+        # Fallback ke auto
         return self._get_auto_provider()
 
     def _get_auto_provider(self):
@@ -53,8 +70,7 @@ class LLMProvider:
 
         try:
             
-            import json as _json
-            extra_headers = {}
+                extra_headers = {}
             if provider.extra_headers:
                 try:
                     extra_headers = _json.loads(provider.extra_headers)
@@ -89,7 +105,6 @@ class LLMProvider:
 
     async def _fallback(self, messages: list, exclude_id: int = None):
         """Try another provider when the primary fails."""
-        import json as _json
         
         query = self.db.query(LLMProviderModel).filter(
             LLMProviderModel.is_active == True,

@@ -1,3 +1,5 @@
+import hashlib
+import re
 import os
 import random
 import asyncio
@@ -9,15 +11,16 @@ from app.scraper.deduplicator import Deduplicator
 
 class MapsScraper:
 
-    def __init__(self, config):
+    def __init__(self, config, db):
         self.config = config
+        self.db = db
         self.parser = DetailParser()
         self.limiter = RateLimiter(
             config.delay_min_seconds,
             config.delay_max_seconds
         )
         self.normalizer = DataNormalizer()
-        self.deduplicator = Deduplicator()
+        self.deduplicator = Deduplicator(self.db)
         self.results = []
 
     def _profile_exists(self):
@@ -29,13 +32,32 @@ class MapsScraper:
         raw_data['review_count'] = self.normalizer.normalize_review_count(raw_data.get('review_count'))
         raw_data['website'] = self.normalizer.normalize_url(raw_data.get('website'))
 
-        place_id_match = raw_data.get('google_maps_url', '').split('!')
-        if len(place_id_match) > 1:
-            raw_data['place_id'] = place_id_match[-1]
+        
+        url = raw_data.get('google_maps_url', '')
+        place_id = None
+        
+        # Try to find hex-like IDs after 1s or 8m2
+        match = re.search(r'!(?:1s|8m2!3d[^!]+!4d[^!]+!1s)(0x[a-f0-9]+:0x[a-f0-9]+)', url, re.IGNORECASE)
+        if match:
+            place_id = match.group(1)
         else:
-            raw_data['place_id'] = raw_data.get('name', '') + raw_data.get('address', '')
+            # Fallback to splitting by ! and getting the last part if it looks like an ID
+            parts = url.split('!')
+            if len(parts) > 1 and len(parts[-1]) > 10:
+                place_id = parts[-1]
+                
+        if not place_id:
+            # Fallback: hash name + address
+            fallback_str = (raw_data.get('name', '') + raw_data.get('address', '')).lower()
+            place_id = 'hash_' + hashlib.md5(fallback_str.encode()).hexdigest()
+            
+        raw_data['place_id'] = place_id
             
         return raw_data
+
+    # Constants for CSS Selectors (Item 38)
+    SELECTOR_LISTING = 'div.Nv2PK'
+    SELECTOR_FEED_PANEL = 'div[role="feed"]'
 
     async def scrape(self, keyword: str, city: str, stop_flag: dict = None):
         async with async_playwright() as p:
@@ -60,7 +82,7 @@ class MapsScraper:
 
             await self._scroll_listings(page)
 
-            listings = await page.query_selector_all('div.Nv2PK')
+            listings = await page.query_selector_all(self.SELECTOR_LISTING)
 
             for listing in listings:
                 
@@ -93,14 +115,14 @@ class MapsScraper:
 
     async def _scroll_listings(self, page, max_attempts: int = 25):
         """Scroll the listings panel to load more, with max_attempts limit."""
-        panel = await page.query_selector('div[role="feed"]')
+        panel = await page.query_selector(self.SELECTOR_FEED_PANEL)
         if panel:
             prev_count = 0
             attempts = 0
             while attempts < max_attempts:
                 await panel.evaluate('el => el.scrollTop += 1000')
                 await asyncio.sleep(2)
-                listings = await page.query_selector_all('div.Nv2PK')
+                listings = await page.query_selector_all(self.SELECTOR_LISTING)
                 if len(listings) == prev_count:
                     break
                 prev_count = len(listings)
