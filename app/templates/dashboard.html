@@ -51,5 +51,72 @@
             </button>
         </div>
     </div>
+    
+    <!-- AI Scoring Panel -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg md:col-span-2">
+        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    🤖 AI Scoring
+                </h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                    Belum di-score: <b>{{ unscored }}</b> bisnis | Sudah di-score: <b>{{ scored }}</b> bisnis
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <select name="provider" class="text-sm border-gray-300 rounded-md">
+                    <option value="">Auto Provider</option>
+                    {% for p in providers %}
+                    <option value="{{ p.provider_name }}">{{ p.provider_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="border-t border-gray-200 p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-medium text-gray-900 mb-3">📊 Provider Status</h4>
+                <ul class="space-y-2">
+                    {% for p in providers %}
+                    <li class="flex items-center justify-between text-sm">
+                        <span>
+                            {% if p.is_active and p.is_available %}✅{% else %}❌{% endif %} {{ p.provider_name }} ({{ p.model_name }})
+                        </span>
+                        <span class="text-gray-500 text-xs">
+                            Token: {{ p.tokens_used_today or 0 }}/{{ p.daily_token_limit or '∞' }}
+                        </span>
+                    </li>
+                    {% else %}
+                    <li class="text-sm text-gray-500 italic">Belum ada provider yang dikonfigurasi.</li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-4">
+                    <a href="/settings" class="text-sm text-indigo-600 hover:text-indigo-900">+ Tambah Provider</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-medium text-gray-900 mb-3">Tiers</h4>
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>🔥 HOT</span>
+                        <span class="font-bold">{{ hot }} bisnis</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>🟡 WARM</span>
+                        <span class="font-bold">{{ warm }} bisnis</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>🔵 COLD</span>
+                        <span class="font-bold">{{ cold }} bisnis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex gap-4">
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded shadow-sm focus:outline-none"
+                hx-post="/scoring/run" hx-swap="none" onclick="alert('Scoring started')">
+                ▶ Score Semua Unscored
+            </button>
+        </div>
+    </div>
 </div>
 {% endblock %}
