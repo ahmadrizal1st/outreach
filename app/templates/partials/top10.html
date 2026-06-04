@@ -9,13 +9,13 @@
   <div class="space-y-3">
     {% for prospect in top10 %}
     <div class="border border-gray-100 rounded-xl p-4 hover:border-indigo-300 transition-colors duration-200">
-      <!-- Header -->
+      
       <div class="flex justify-between items-start mb-2">
         <div>
           <span class="font-semibold text-gray-900">{{ prospect.name }}</span>
           <span class="text-xs text-gray-500 ml-2">{{ prospect.category }}</span>
         </div>
-        <!-- Tier Badge -->
+        
         {% if prospect.priority_tier == 'HOT' %}
         <span class="bg-red-50 text-red-700 border border-red-100 text-xs px-2 py-0.5 rounded-full font-medium shadow-sm">
           <i class="fa-solid fa-fire text-red-500"></i> HOT {{ prospect.priority_score }}
@@ -31,7 +31,6 @@
         {% endif %}
       </div>
 
-      <!-- Info -->
       <div class="text-xs text-gray-500 mb-3 space-y-1">
         <p><i class="fa-solid fa-location-dot"></i> {{ prospect.city }}</p>
         <p><i class="fa-solid fa-star text-yellow-400"></i> {{ prospect.rating }} ({{ prospect.review_count }} review)</p>
@@ -41,23 +40,22 @@
         {% endif %}
       </div>
 
-      <!-- Actions -->
       <div class="flex gap-2 mt-3">
-        <!-- Buka WA -->
+        
         {% if prospect.phone_normalized %}
         <a href="https://wa.me/{{ prospect.phone_normalized }}" target="_blank" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium py-2 rounded-lg text-center transition-colors duration-150">
           <i class="fa-solid fa-mobile-screen"></i> Buka WA
         </a>
         {% endif %}
-        <!-- Detail -->
+        
         <a href="/prospects/{{ prospect.id }}" class="flex-1 border border-gray-200 hover:bg-gray-50 text-xs font-medium py-2 rounded-lg text-center text-gray-700 transition-colors duration-150">
           Lihat Detail
         </a>
-        <!-- Skip -->
+        
         <button hx-post="/pipeline/skip/{{ prospect.id }}" hx-swap="outerHTML" hx-target="closest div.border" class="px-3 border border-gray-200 hover:bg-gray-50 text-xs font-medium py-2 rounded-lg text-gray-600 transition-colors duration-150">
           Skip
         </button>
-        <!-- Blacklist -->
+        
         <button hx-post="/pipeline/blacklist/{{ prospect.id }}" hx-confirm="Blacklist bisnis ini?" hx-swap="outerHTML" hx-target="closest div.border" class="px-3 border border-red-100 hover:bg-red-50 text-xs font-medium py-2 rounded-lg text-red-500 transition-colors duration-150">
           <i class="fa-solid fa-ban text-red-500"></i>
         </button>

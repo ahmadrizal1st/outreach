@@ -1,0 +1,96 @@
+{% if state.running %}
+<div id="progress-running" class="bg-white rounded-xl p-5 shadow-sm border border-indigo-100">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="font-semibold text-gray-800"><i class="fa-solid fa-spinner fa-spin text-indigo-500"></i> Scraping Berjalan...</h3>
+    <button hx-post="/scraper/stop" hx-swap="none" onclick="toggleButtons(false)"
+      class="text-xs bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg transition-colors font-medium">
+      <i class="fa-solid fa-stop"></i> Stop
+    </button>
+  </div>
+
+  <div class="bg-indigo-50 rounded-lg p-3 mb-4 text-sm">
+    <p class="text-indigo-700 font-medium">
+      <i class="fa-solid fa-search text-indigo-400"></i>
+      Sedang mencari: <strong>{{ state.keyword }}</strong> di <strong>{{ state.city }}</strong>
+    </p>
+  </div>
+
+  <div class="grid grid-cols-3 gap-3 mb-4">
+    <div class="text-center bg-gray-50 rounded-lg p-3">
+      <p class="text-2xl font-bold text-indigo-600">{{ state.found }}</p>
+      <p class="text-xs text-gray-500 mt-1">Ditemukan</p>
+    </div>
+    <div class="text-center bg-gray-50 rounded-lg p-3">
+      <p class="text-2xl font-bold text-green-600">{{ state.saved }}</p>
+      <p class="text-xs text-gray-500 mt-1">Disimpan</p>
+    </div>
+    <div class="text-center bg-gray-50 rounded-lg p-3">
+      <p class="text-2xl font-bold text-gray-600">{{ state.total_target }}</p>
+      <p class="text-xs text-gray-500 mt-1">Target</p>
+    </div>
+  </div>
+
+  {% if state.total_target > 0 %}
+  <div class="mb-4">
+    <div class="bg-gray-100 rounded-full h-2">
+      {% set pct = (state.saved / state.total_target * 100) | int %}
+      <div class="bg-indigo-500 h-2 rounded-full transition-all" style="width: {{ [pct, 100] | min }}%"></div>
+    </div>
+    <p class="text-xs text-gray-400 mt-1 text-right">{{ [pct, 100] | min }}% tercapai</p>
+  </div>
+  {% endif %}
+
+  {% if state.log %}
+  <div class="bg-gray-900 rounded-lg p-3 text-xs font-mono text-green-400 max-h-40 overflow-y-auto">
+    {% for line in state.log[-15:] %}
+    <p>{{ line }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+{% else %}
+
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+  {% if state.error %}
+  <div class="mb-3 text-red-600 text-sm p-3 bg-red-50 rounded-lg border border-red-200">
+    <i class="fa-solid fa-xmark-circle"></i> Error: {{ state.error }}
+  </div>
+  {% endif %}
+
+  {% if state.log %}
+  
+  <div class="mb-4 flex items-center gap-2">
+    <i class="fa-solid fa-check-circle text-green-500"></i>
+    <p class="text-sm font-semibold text-gray-700">Scraping selesai!</p>
+  </div>
+  <div class="grid grid-cols-2 gap-3 mb-4">
+    <div class="text-center bg-green-50 rounded-lg p-3 border border-green-100">
+      <p class="text-2xl font-bold text-green-600">{{ state.saved }}</p>
+      <p class="text-xs text-gray-500 mt-1">Prospect baru disimpan</p>
+    </div>
+    <div class="text-center bg-blue-50 rounded-lg p-3 border border-blue-100">
+      <p class="text-2xl font-bold text-blue-600">{{ state.found }}</p>
+      <p class="text-xs text-gray-500 mt-1">Total ditemukan</p>
+    </div>
+  </div>
+  <a href="/prospects" class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition-colors">
+    <i class="fa-solid fa-eye"></i> Lihat Prospect Baru
+  </a>
+
+  <details class="mt-3">
+    <summary class="text-xs text-gray-400 cursor-pointer">Lihat log detail</summary>
+    <div class="bg-gray-900 rounded-lg p-3 text-xs font-mono text-green-400 max-h-40 overflow-y-auto mt-2">
+      {% for line in state.log %}
+      <p>{{ line }}</p>
+      {% endfor %}
+    </div>
+  </details>
+  {% else %}
+  <div class="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+    <i class="fa-solid fa-spider text-gray-300 text-4xl mb-3"></i>
+    <p class="text-gray-400 text-sm">Scraper belum berjalan. Isi form dan klik <strong>Mulai Scraping</strong>.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}

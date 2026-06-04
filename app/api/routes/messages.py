@@ -20,7 +20,7 @@ async def generate_first_message(
     provider: str = None,
     db: Session = Depends(get_db)
 ):
-    generator = MessageGenerator(manual_provider=provider)
+    generator = MessageGenerator(db=db, manual_provider=provider)
     result = await generator.generate_first(prospect_id)
     
     return templates.TemplateResponse(request=request, name="messages/preview.html", context={"request": request, "result": result, "prospect_id": prospect_id, "generator": generator})
@@ -33,7 +33,7 @@ async def generate_followup_message(
     provider: str = None,
     db: Session = Depends(get_db)
 ):
-    generator = MessageGenerator(manual_provider=provider)
+    generator = MessageGenerator(db=db, manual_provider=provider)
     result = await generator.generate_followup(prospect_id, sequence)
     
     return templates.TemplateResponse(request=request, name="messages/preview.html", context={"request": request, "result": result, "prospect_id": prospect_id, "generator": generator})
@@ -45,18 +45,16 @@ async def regenerate_message(
     provider: str = None,
     db: Session = Depends(get_db)
 ):
-    generator = MessageGenerator(manual_provider=provider)
+    generator = MessageGenerator(db=db, manual_provider=provider)
     result = await generator.generate_first(prospect_id)
     
     return templates.TemplateResponse(request=request, name="messages/preview.html", context={"request": request, "result": result, "prospect_id": prospect_id, "generator": generator})
 
 @router.post("/sent/{message_id}")
 async def mark_sent(message_id: int, db: Session = Depends(get_db)):
-    generator = MessageGenerator()
+    generator = MessageGenerator(db=db)
     generator.mark_as_sent(message_id)
-    
-    # We could trigger an out-of-band HTMX update for history if we wanted,
-    # but returning a simple empty response or updating the button is enough.
+
     return HTMLResponse("")
 
 @router.get("/history/{prospect_id}", response_class=HTMLResponse)

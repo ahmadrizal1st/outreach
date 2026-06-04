@@ -30,27 +30,27 @@ Layanan    : {score.get('recommended_service') if score else '-'}
 Catatan    : {review.get('opportunity_notes') if review else '-'}
 
 Buat konten dalam format JSON:
-{{
+{ 
   "tagline": "Tagline bisnis yang menarik (max 10 kata)",
   "hero_description": "Deskripsi singkat di hero section (max 30 kata)",
   "about_text": "Paragraf tentang bisnis ini (max 60 kata)",
   "services": [
-    {{
+    { 
       "title": "Nama Layanan 1",
       "description": "Deskripsi singkat (max 15 kata)"
-    }},
-    {{
+    } ,
+    { 
       "title": "Nama Layanan 2",
       "description": "Deskripsi singkat (max 15 kata)"
-    }},
-    {{
+    } ,
+    { 
       "title": "Nama Layanan 3",
       "description": "Deskripsi singkat (max 15 kata)"
-    }}
+    } 
   ],
   "cta_text": "Teks tombol call-to-action (max 5 kata)",
   "footer_tagline": "Kalimat penutup singkat (max 10 kata)"
-}}
+} 
 """
 
     return [

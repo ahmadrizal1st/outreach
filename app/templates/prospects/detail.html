@@ -3,7 +3,6 @@
 
 <div class="max-w-4xl mx-auto space-y-6">
 
-  <!-- Header Section -->
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-start justify-between gap-4">
     <div>
       <div class="flex items-center gap-3">
@@ -15,14 +14,30 @@
         {% endif %}
       </div>
       <p class="text-gray-500 mt-1 flex items-center gap-2">
+        {% if prospect.source_keyword == 'manual' %}
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-800">
+            <i class="fa-solid fa-user-pen mr-1"></i> Manual
+          </span>
+        {% endif %}
         {{ prospect.category }} &middot; {{ prospect.city }}
         {% if pipeline %}
           {% include 'partials/followup_badge.html' %}
         {% endif %}
       </p>
     </div>
-    {% if score %}
-    <div>
+    <div class="flex items-center gap-3">
+      <div class="flex gap-2">
+        <a href="/prospects/{{ prospect.id }}/edit" class="inline-flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium">
+          <i class="fa-solid fa-pen mr-1.5"></i> Edit
+        </a>
+        <form action="/prospects/{{ prospect.id }}/delete" method="POST" class="inline m-0 p-0" onsubmit="return confirm('Yakin ingin menghapus prospect ini? Semua data terkait (review, history pesan) juga akan terhapus.');">
+          <button type="submit" class="inline-flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium">
+            <i class="fa-solid fa-trash mr-1.5"></i> Hapus
+          </button>
+        </form>
+      </div>
+      {% if score %}
+      <div>
       <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
           {% if score.priority_tier == 'HOT' %} bg-red-50 text-red-700 border border-red-100
           {% elif score.priority_tier == 'WARM' %} bg-yellow-50 text-yellow-700 border border-yellow-100
@@ -32,12 +47,12 @@
         {% else %} <i class="fa-solid fa-circle text-blue-500"></i> {% endif %}
         {{ score.priority_tier }} {{ score.priority_score }}
       </span>
+      {% endif %}
     </div>
-    {% endif %}
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Info Bisnis -->
+    
     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
         <span><i class="fa-solid fa-clipboard-list"></i></span> Info Bisnis
@@ -86,7 +101,6 @@
       </div>
     </div>
 
-    <!-- AI Analysis -->
     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col h-full">
       <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
         <span><i class="fa-solid fa-robot"></i></span> AI Analysis
@@ -120,7 +134,7 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Website Review -->
+    
     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-full flex flex-col">
       <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
         <span><i class="fa-solid fa-globe"></i></span> Review Website
@@ -145,9 +159,35 @@
       </div>
     </div>
 
-    <!-- Pesan & WA Link -->
-    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col gap-6">
-      <!-- Quick Action -->
+    <!-- Website Preview (Mockup) -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-full flex flex-col">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <span><i class="fa-solid fa-laptop-code"></i></span> Preview Website (Mockup)
+      </h2>
+      <div id="preview-container" class="flex-1 flex flex-col bg-gray-50 rounded-xl p-4 border border-dashed border-gray-200 justify-center">
+        {% if prospect.about_summary and prospect.about_summary.startswith('{') %}
+          <div class="text-green-600 text-sm font-medium p-3 bg-green-50 rounded-lg border border-green-200 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-check-circle"></i> Preview sudah di-generate!
+          </div>
+          <a href="/preview/view/{{ prospect.id }}" target="_blank" class="w-full inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-colors text-sm gap-2">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Live Preview
+          </a>
+        {% else %}
+          <div class="flex-1 flex items-center justify-center text-center py-4">
+            <div>
+              <p class="text-sm text-gray-500 mb-4">Buat draft landing page menggunakan AI sebagai contoh untuk prospek.</p>
+              <button hx-post="/preview/generate/{{ prospect.id }}" hx-target="#preview-container" class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 rounded-lg transition-colors text-sm" onclick="this.innerHTML='<span class=\'animate-pulse\'><i class=\'fa-solid fa-spinner fa-spin mr-1\'></i> Membuat Preview...</span>'">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Preview Sekarang
+              </button>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col gap-6 md:col-span-2">
+      
       <div>
         <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <span><i class="fa-solid fa-mobile-screen"></i></span> Tindakan (Action)
@@ -155,10 +195,8 @@
         {% include 'partials/wa_button.html' %}
       </div>
 
-      <!-- Preview Generation -->
       <div id="message-preview" class="empty:hidden"></div>
 
-      <!-- History -->
       <div id="message-history" hx-get="/messages/history/{{ prospect.id }}" hx-trigger="load">
         <div class="animate-pulse flex space-x-4">
           <div class="flex-1 space-y-4 py-1">
@@ -176,7 +214,6 @@
     </div>
   </div>
 
-  <!-- Pipeline Status -->
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
     <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
       <span><i class="fa-solid fa-chart-bar"></i></span> Pipeline Status

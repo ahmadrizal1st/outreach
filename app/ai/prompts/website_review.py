@@ -32,7 +32,7 @@ Meta : {check_result.get('meta_description')}
 Teks : {check_result.get('page_text', '')[:1000]}
 
 Berikan analisis dalam format JSON berikut:
-{{
+{ 
   "design_quality_score": 7,
   "website_age_estimate": "terlihat >5 tahun",
   "website_issues": [
@@ -44,7 +44,7 @@ Berikan analisis dalam format JSON berikut:
   "opportunity_reason": "...",
   "estimated_value": "high",
   "urgency": "medium"
-}}
+} 
 
 opportunity_type: remake/redesign/optimasi/none
 estimated_value: low/medium/high

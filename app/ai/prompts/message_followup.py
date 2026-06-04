@@ -47,18 +47,18 @@ FOLLOW-UP KE: {followup_sequence}
 ANGLE YANG HARUS DIPAKAI: {angle}
 
 Buat 2 variasi pesan follow-up:
-{{
+{ 
   "variants": [
-    {{
+    { 
       "tone": "semi-formal",
       "message": "..."
-    }},
-    {{
+    } ,
+    { 
       "tone": "kasual",
       "message": "..."
-    }}
+    } 
   ]
-}}
+} 
 """
 
     return [

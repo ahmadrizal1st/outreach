@@ -20,14 +20,14 @@ Review   : {prospect.get('review_count')}
 Website  : {prospect.get('website') or 'Tidak ada'}
 
 Format response:
-{{
+{ 
   "digital_maturity": "rendah/menengah/tinggi",
   "main_opportunity": "...",
   "pain_points": ["...", "..."],
   "value_proposition": "...",
   "competitor_advantage": "...",
   "urgency_reason": "..."
-}}
+} 
 """
 
     return [

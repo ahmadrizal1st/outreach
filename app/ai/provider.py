@@ -19,10 +19,9 @@ class LLMProvider:
         return self._get_auto_provider()
 
     def _get_auto_provider(self):
-        # Reset token harian jika hari baru
+        
         self._reset_daily_tokens_if_needed()
 
-        # Ambil semua provider yang masih available
         providers = self.db.query(LLMProviderModel).filter(
             LLMProviderModel.is_active == True,
             LLMProviderModel.is_available == True,
@@ -35,9 +34,6 @@ class LLMProvider:
         if not providers:
             raise Exception("Semua provider habis quota hari ini")
 
-        # Pilih random dari yang available jika ada yang prioritasnya sama, tapi karena order_by, kita bisa ambil yang prioritas teratas
-        # Tapi berdasarkan specs, random dari yang available? Kita pakai choice untuk saat ini atau ambil yang pertama.
-        # "Pilih random dari yang available"
         return random.choice(providers)
 
     def _get_provider(self, name: str):
@@ -56,43 +52,81 @@ class LLMProvider:
         self.last_used_model = provider.model_name
 
         try:
-            response = completion(
-                model=f"{provider.provider_name}/{provider.model_name}",
-                messages=messages,
-                api_key=provider.api_key,
-                temperature=0.7,
-                max_tokens=1000
-            )
+            
+            import json as _json
+            extra_headers = {}
+            if provider.extra_headers:
+                try:
+                    extra_headers = _json.loads(provider.extra_headers)
+                except Exception:
+                    pass
 
-            # Update token usage
-            tokens_used = response.usage.total_tokens
+            kwargs = {
+                "model": f"{provider.provider_name}/{provider.model_name}",
+                "messages": messages,
+                "api_key": provider.api_key,
+                "temperature": provider.temperature or 0.7,
+                "max_tokens": provider.max_tokens or 1000,
+            }
+
+            if provider.base_url:
+                kwargs["base_url"] = provider.base_url
+
+            if extra_headers:
+                kwargs["extra_headers"] = extra_headers
+
+            response = completion(**kwargs)
+
+            tokens_used = response.usage.total_tokens if response.usage else 0
             self._update_token_usage(provider.id, tokens_used)
 
             return response.choices[0].message.content
 
         except Exception as e:
-            # Mark provider unavailable & fallback
+            
             self._mark_unavailable(provider.id)
-            return await self._fallback(messages)
+            return await self._fallback(messages, exclude_id=provider.id)
 
-    async def _fallback(self, messages: list):
-        # Coba provider lain
-        provider = self._get_auto_provider()
+    async def _fallback(self, messages: list, exclude_id: int = None):
+        """Try another provider when the primary fails."""
+        import json as _json
+        
+        query = self.db.query(LLMProviderModel).filter(
+            LLMProviderModel.is_active == True,
+            LLMProviderModel.is_available == True,
+        )
+        if exclude_id:
+            query = query.filter(LLMProviderModel.id != exclude_id)
+
+        provider = query.order_by(asc(LLMProviderModel.priority_order)).first()
         if not provider:
             raise Exception("Tidak ada provider yang tersedia untuk fallback")
 
         self.last_used_provider = provider.provider_name
         self.last_used_model = provider.model_name
 
-        response = completion(
-            model=f"{provider.provider_name}/{provider.model_name}",
-            messages=messages,
-            api_key=provider.api_key,
-            temperature=0.7,
-            max_tokens=1000
-        )
-        
-        tokens_used = response.usage.total_tokens
+        extra_headers = {}
+        if provider.extra_headers:
+            try:
+                extra_headers = _json.loads(provider.extra_headers)
+            except Exception:
+                pass
+
+        kwargs = {
+            "model": f"{provider.provider_name}/{provider.model_name}",
+            "messages": messages,
+            "api_key": provider.api_key,
+            "temperature": provider.temperature or 0.7,
+            "max_tokens": provider.max_tokens or 1000,
+        }
+        if provider.base_url:
+            kwargs["base_url"] = provider.base_url
+        if extra_headers:
+            kwargs["extra_headers"] = extra_headers
+
+        response = completion(**kwargs)
+
+        tokens_used = response.usage.total_tokens if response.usage else 0
         self._update_token_usage(provider.id, tokens_used)
 
         return response.choices[0].message.content

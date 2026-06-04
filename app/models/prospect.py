@@ -1,6 +1,35 @@
+from datetime import datetime
+
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, ForeignKey
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy.sql import func
+from cryptography.fernet import Fernet
 from app.core.database import Base
+from app.core.config import settings
+
+class EncryptedString(TypeDecorator):
+    impl = String
+    cache_ok = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.ENCRYPTION_KEY:
+            raise ValueError("ENCRYPTION_KEY is required for EncryptedString")
+        self.fernet = Fernet(settings.ENCRYPTION_KEY)
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return self.fernet.encrypt(value.encode('utf-8')).decode('utf-8')
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            try:
+                return self.fernet.decrypt(value.encode('utf-8')).decode('utf-8')
+            except Exception:
+                # Fallback untuk plain text lama
+                return value
+        return value
 
 class Prospect(Base):
     __tablename__ = "prospects"
@@ -47,7 +76,6 @@ class Prospect(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
-
 class ProspectScore(Base):
     __tablename__ = "prospect_scores"
 
@@ -60,7 +88,6 @@ class ProspectScore(Base):
     pitch_angle = Column(String)
     relevant_keywords = Column(String)
     scored_at = Column(DateTime, default=func.now())
-
 
 class WebsiteReview(Base):
     __tablename__ = "website_reviews"
@@ -88,7 +115,6 @@ class WebsiteReview(Base):
 
     created_at = Column(DateTime, default=func.now())
 
-
 class Message(Base):
     __tablename__ = "messages"
 
@@ -103,7 +129,6 @@ class Message(Base):
     sent_at = Column(DateTime)
     status = Column(String, default="draft")
 
-
 class Followup(Base):
     __tablename__ = "followups"
 
@@ -115,7 +140,6 @@ class Followup(Base):
     status = Column(String, default="pending")
     notes = Column(String)
     created_at = Column(DateTime, default=func.now())
-
 
 class Pipeline(Base):
     __tablename__ = "pipeline"
@@ -133,17 +157,20 @@ class Pipeline(Base):
     notes = Column(String)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
-
-
-
-
 class LLMProvider(Base):
     __tablename__ = "llm_providers"
 
     id = Column(Integer, primary_key=True, index=True)
-    provider_name = Column(String, nullable=False)
-    api_key = Column(String, nullable=False)
+    provider_name = Column(String, nullable=False)  
+    display_name = Column(String)                   
+    api_key = Column(EncryptedString, nullable=False)
     model_name = Column(String, nullable=False)
+    base_url = Column(String)                       
+    api_type = Column(String, default="openai")     
+    extra_headers = Column(String)                  
+    max_tokens = Column(Integer, default=1000)
+    temperature = Column(Float, default=0.7)
+    notes = Column(String)                          
     is_active = Column(Boolean, default=True)
     priority_order = Column(Integer, default=1)
     daily_token_limit = Column(Integer)
@@ -152,7 +179,6 @@ class LLMProvider(Base):
     last_reset_at = Column(Date)
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
-
 
 class ScraperConfig(Base):
     __tablename__ = "scraper_config"
@@ -168,7 +194,6 @@ class ScraperConfig(Base):
     last_run_at = Column(DateTime)
     created_at = Column(DateTime, default=func.now())
 
-
 class ScraperProgress(Base):
     __tablename__ = "scraper_progress"
 
@@ -179,3 +204,13 @@ class ScraperProgress(Base):
     total_saved = Column(Integer, default=0)
     scraped_at = Column(DateTime, default=func.now())
     status = Column(String, default="completed")
+
+class AppSetting(Base):
+    """Key-value store untuk konfigurasi aplikasi yang bisa diubah dari UI."""
+    __tablename__ = "app_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, nullable=False, index=True)
+    value = Column(String)
+    description = Column(String)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

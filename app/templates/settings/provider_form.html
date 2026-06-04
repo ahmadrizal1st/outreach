@@ -1,0 +1,147 @@
+{% set is_edit = edit_mode is defined and edit_mode %}
+{% set p = provider if provider is defined else {} %}
+
+<form
+  {% if is_edit %}
+    hx-post="/llm-providers/{{ p.id }}/update"
+  {% else %}
+    hx-post="/llm-providers/create"
+  {% endif %}
+  hx-target="#provider-list"
+  hx-swap="innerHTML"
+  hx-on::after-request="document.getElementById('add-provider-form') && document.getElementById('add-provider-form').classList.add('hidden')"
+  class="bg-gray-50 rounded-xl p-5 border border-gray-200 space-y-4">
+
+  <h3 class="font-semibold text-gray-800 text-sm">
+    {% if is_edit %}<i class="fa-solid fa-pen text-indigo-500"></i> Edit Provider{% else %}<i class="fa-solid fa-plus text-indigo-500"></i> Tambah Provider Baru{% endif %}
+  </h3>
+
+  <div class="grid grid-cols-2 gap-4">
+    {% if not is_edit %}
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Provider Name <span class="text-red-500">*</span></label>
+      <input type="text" name="provider_name" required placeholder="groq / gemini / openai / ollama"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+      <p class="text-xs text-gray-400 mt-1">Harus cocok dengan nama provider di litellm</p>
+    </div>
+    {% endif %}
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Display Name</label>
+      <input type="text" name="display_name" value="{{ p.get('display_name', '') }}" placeholder="Nama tampilan (opsional)"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Model Name <span class="text-red-500">*</span></label>
+      <input type="text" name="model_name" value="{{ p.get('model_name', '') }}" required placeholder="llama-3.3-70b-versatile"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">API Key <span class="text-red-500">*</span></label>
+    <input type="password" name="api_key" value="{{ p.get('api_key', '') }}" required
+      placeholder="sk-xxxx / gsk_xxxx / AIzaxxxx"
+      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Base URL <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
+      <input type="url" name="base_url" value="{{ p.get('base_url', '') }}"
+        placeholder="http://localhost:11434 (untuk Ollama)"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+      <p class="text-xs text-gray-400 mt-1">Kosongkan jika menggunakan endpoint default provider</p>
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">API Type</label>
+      <select name="api_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        <option value="openai" {% if p.get('api_type', 'openai') == 'openai' %}selected{% endif %}>OpenAI-compatible</option>
+        <option value="gemini" {% if p.get('api_type') == 'gemini' %}selected{% endif %}>Google Gemini</option>
+        <option value="anthropic" {% if p.get('api_type') == 'anthropic' %}selected{% endif %}>Anthropic Claude</option>
+        <option value="ollama" {% if p.get('api_type') == 'ollama' %}selected{% endif %}>Ollama (lokal)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-3 gap-4">
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Max Tokens</label>
+      <input type="number" name="max_tokens" value="{{ p.get('max_tokens', 1000) }}" min="100" max="32000"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Temperature</label>
+      <input type="number" name="temperature" value="{{ p.get('temperature', 0.7) }}" min="0" max="2" step="0.1"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Daily Token Limit</label>
+      <input type="number" name="daily_token_limit" value="{{ p.get('daily_token_limit', '') }}" min="0"
+        placeholder="Kosong = unlimited"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Priority Order</label>
+      <input type="number" name="priority_order" value="{{ p.get('priority_order', 1) }}" min="1"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+      <p class="text-xs text-gray-400 mt-1">Angka kecil = prioritas lebih tinggi (auto mode)</p>
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Extra Headers <span class="text-gray-400 font-normal normal-case">(JSON, opsional)</span></label>
+      <input type="text" name="extra_headers" value="{{ p.get('extra_headers', '') }}"
+        placeholder='{"X-Custom-Header": "value"}'
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Catatan</label>
+    <input type="text" name="notes" value="{{ p.get('notes', '') }}"
+      placeholder="Catatan pribadi tentang provider ini"
+      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+  </div>
+
+  {% if not is_edit %}
+  <div>
+    <div id="test-result"></div>
+    <button type="button"
+      onclick="testConnection(this.closest('form'))"
+      class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+      <i class="fa-solid fa-plug-circle-check"></i> Test Koneksi
+    </button>
+  </div>
+  {% endif %}
+
+  <div class="flex gap-3 pt-2 border-t border-gray-200">
+    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 rounded-lg transition-colors">
+      <i class="fa-solid fa-floppy-disk"></i> {% if is_edit %}Simpan Perubahan{% else %}Tambah Provider{% endif %}
+    </button>
+    {% if is_edit %}
+    <button type="button"
+      onclick="this.closest('[id^=edit-form]').classList.add('hidden')"
+      class="px-4 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      Batal
+    </button>
+    {% else %}
+    <button type="button" onclick="document.getElementById('add-provider-form').classList.add('hidden')"
+      class="px-4 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      Batal
+    </button>
+    {% endif %}
+  </div>
+</form>
+
+<script>
+async function testConnection(form) {
+  const data = new FormData(form);
+  const result = document.getElementById('test-result');
+  if(result) {
+    result.innerHTML = '<p class="text-sm text-gray-500 animate-pulse"><i class="fa-solid fa-spinner fa-spin"></i> Testing...</p>';
+    const resp = await fetch('/llm-providers/test', { method: 'POST', body: data });
+    result.innerHTML = await resp.text();
+  }
+}
+</script>

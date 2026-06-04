@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-2xl mx-auto">
+
+  <div class="mb-6 flex items-center gap-4">
+    <a href="/prospects" class="text-gray-400 hover:text-gray-600 transition-colors">
+      <i class="fa-solid fa-arrow-left text-lg"></i>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">
+        {% if edit_mode %}
+          <i class="fa-solid fa-pen text-indigo-600"></i> Edit Prospect
+        {% else %}
+          <i class="fa-solid fa-plus text-indigo-600"></i> Tambah Prospect Manual
+        {% endif %}
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        {% if edit_mode %}Update data prospect {{ prospect.name }}.{% else %}Tambahkan calon client secara manual tanpa scraping.{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <form
+      {% if edit_mode %}
+        action="/prospects/{{ prospect.id }}/update"
+      {% else %}
+        action="/prospects/create"
+      {% endif %}
+      method="post"
+      class="space-y-5">
+
+      <div>
+        <label for="name" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">
+          Nama Bisnis <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="name" name="name"
+          value="{{ prospect.name if prospect else '' }}"
+          placeholder="Contoh: Warung Makan Bu Sari"
+          required
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="category" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Kategori</label>
+          <select id="category" name="category"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if prospect and prospect.category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="city" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Kota / Area</label>
+          <input type="text" id="city" name="city"
+            value="{{ prospect.city if prospect else '' }}"
+            placeholder="Surabaya, Malang, dll."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+
+      <div>
+        <label for="address" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Alamat Lengkap</label>
+        <input type="text" id="address" name="address"
+          value="{{ prospect.address if prospect else '' }}"
+          placeholder="Jl. Contoh No. 1, Kecamatan, Kota"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="phone_raw" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">No. Telepon / WhatsApp</label>
+          <input type="text" id="phone_raw" name="phone_raw"
+            value="{{ prospect.phone_raw if prospect else '' }}"
+            placeholder="08123456789 atau +628123456789"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <p class="text-xs text-gray-400 mt-1">Akan dinormalisasi otomatis ke format +62</p>
+        </div>
+        <div>
+          <label for="website" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Website</label>
+          <input type="url" id="website" name="website"
+            value="{{ prospect.website if prospect else '' }}"
+            placeholder="https://namabisnis.com"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="email" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Email <span class="text-gray-400 font-normal">(opsional)</span></label>
+          <input type="email" id="email" name="email"
+            value=""
+            placeholder="email@bisnis.com"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label for="instagram_url" class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Instagram URL <span class="text-gray-400 font-normal">(opsional)</span></label>
+          <input type="url" id="instagram_url" name="instagram_url"
+            value="{{ prospect.instagram_url if prospect else '' }}"
+            placeholder="https://instagram.com/bisnis"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+
+      {% if not edit_mode %}
+      <div class="bg-blue-50 rounded-lg p-3 border border-blue-100 text-xs text-blue-700">
+        <i class="fa-solid fa-info-circle"></i>
+        Prospect yang ditambahkan secara manual akan ditandai dengan label <strong>Manual</strong>.
+        Setelah disimpan, Anda bisa menjalankan AI Scoring dari halaman detail.
+      </div>
+      {% endif %}
+
+      <div class="flex gap-3 pt-3 border-t border-gray-100">
+        <button type="submit"
+          class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors text-sm">
+          <i class="fa-solid fa-floppy-disk"></i>
+          {% if edit_mode %}Simpan Perubahan{% else %}Tambah Prospect{% endif %}
+        </button>
+        <a href="/prospects{% if edit_mode %}/{{ prospect.id }}{% endif %}"
+          class="px-6 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+          Batal
+        </a>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

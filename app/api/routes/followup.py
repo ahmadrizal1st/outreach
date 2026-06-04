@@ -28,8 +28,7 @@ async def run_followup_check(db: Session = Depends(get_db)):
 async def mark_followup_sent(request: Request, prospect_id: int, db: Session = Depends(get_db)):
     tracker = FollowupTracker()
     tracker.mark_followup_sent(prospect_id)
-    
-    # Refresh the specific card by fetching updated data
+
     from app.models.prospect import Prospect, Pipeline, ProspectScore
     result = db.query(Prospect, Pipeline, ProspectScore).join(
         Pipeline, Prospect.id == Pipeline.prospect_id

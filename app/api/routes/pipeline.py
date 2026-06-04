@@ -34,9 +34,9 @@ async def pipeline_board(request: Request, db: Session = Depends(get_db)):
     pipeline_columns = []
     
     for col in columns:
-        # Fetch prospects for this column
+        
         if col["id"] == "belum_dihubungi":
-            # For belum_dihubungi, we include prospects with no pipeline entry or status = belum_dihubungi
+            
             prospects_data = db.query(Prospect, Pipeline).outerjoin(
                 Pipeline, Prospect.id == Pipeline.prospect_id
             ).filter(
@@ -58,7 +58,7 @@ async def pipeline_board(request: Request, db: Session = Depends(get_db)):
                 "name": p.name,
                 "category": p.category,
                 "city": p.city,
-                "priority_tier": None, # Should join ProspectScore to get this accurately if needed
+                "priority_tier": None, 
                 "next_followup_date": pl.next_followup_date if pl else None
             })
             
@@ -72,14 +72,13 @@ async def pipeline_board(request: Request, db: Session = Depends(get_db)):
         
     return templates.TemplateResponse(request=request, name="pipeline/board.html", context={"request": request, "pipeline_columns": pipeline_columns})
 
-
 @router.post("/skip/{id}")
 async def skip_prospect(id: int, db: Session = Depends(get_db)):
-    # Create or update pipeline status to something like "skipped" (or just hide it)
+    
     pipeline = get_or_create_pipeline(db, id)
     pipeline.contact_status = "skipped"
     db.commit()
-    # Return empty response to remove the element via HTMX outerHTML swap
+    
     return HTMLResponse("")
 
 @router.post("/blacklist/{id}")
@@ -97,8 +96,7 @@ async def update_status(id: int, status: str = Form(...), db: Session = Depends(
     if status == 'sudah_dihubungi' and not pipeline.contacted_at:
         pipeline.contacted_at = datetime.now()
     db.commit()
-    
-    # Returning nothing for HTMX hx-swap="none"
+
     return HTMLResponse("")
 
 @router.post("/notes/{id}")

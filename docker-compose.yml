@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: outreach_web
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./browser_profile.json:/app/browser_profile.json
+    environment:
+      - DATABASE_URL=sqlite:///./data/database.sqlite
+      - TZ=Asia/Jakarta
+    restart: unless-stopped

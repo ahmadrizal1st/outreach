@@ -1,17 +1,242 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Settings
-        </h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500">
-            Configure application preferences and LLM providers.
-        </p>
+
+<div class="max-w-5xl mx-auto">
+
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><i class="fa-solid fa-gear text-indigo-600"></i> Settings</h1>
+      <p class="text-sm text-gray-500 mt-1">Konfigurasi sistem, LLM provider, dan preferensi aplikasi.</p>
     </div>
-    <div class="border-t border-gray-200 p-6">
-        <p class="text-gray-700">Settings implementation goes here.</p>
+  </div>
+
+  <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-green-600 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2">
+    <i class="fa-solid fa-check-circle"></i>
+    <span id="toast-msg">Tersimpan!</span>
+  </div>
+
+  <div class="flex gap-1 mb-6 bg-white rounded-xl p-1 shadow-sm border border-gray-100">
+    <button onclick="switchTab('llm')" id="tab-llm"
+      class="tab-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all bg-indigo-600 text-white">
+      <i class="fa-solid fa-robot"></i> LLM Providers
+    </button>
+    <button onclick="switchTab('scraper')" id="tab-scraper"
+      class="tab-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-50">
+      <i class="fa-solid fa-spider"></i> Scraper
+    </button>
+    <button onclick="switchTab('followup')" id="tab-followup"
+      class="tab-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-50">
+      <i class="fa-solid fa-bell"></i> Follow-up
+    </button>
+    <button onclick="switchTab('profile')" id="tab-profile"
+      class="tab-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-50">
+      <i class="fa-solid fa-user-tie"></i> Profil Jasa
+    </button>
+  </div>
+
+  <div id="pane-llm" class="tab-pane space-y-4">
+
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-sliders text-indigo-500"></i> Mode LLM</h2>
+      <form hx-post="/settings/llm-mode" hx-swap="none" hx-on::after-request="showToast('Mode LLM tersimpan!')" class="flex gap-4 flex-wrap">
+        {% set current_mode = settings.get('llm_mode', 'auto') %}
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="llm_mode" value="auto" {% if current_mode == 'auto' %}checked{% endif %} class="accent-indigo-600">
+          <span class="text-sm font-medium text-gray-700">Auto (rotasi random)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="llm_mode" value="manual" {% if current_mode == 'manual' %}checked{% endif %} class="accent-indigo-600">
+          <span class="text-sm font-medium text-gray-700">Manual (pilih provider)</span>
+        </label>
+
+        {% if providers %}
+        <select name="manual_provider_id" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 {% if current_mode != 'manual' %}opacity-50{% endif %}" id="manual-provider-select">
+          <option value="">— Pilih provider —</option>
+          {% for p in providers %}
+          <option value="{{ p.id }}" {% if settings.get('manual_provider_id') == p.id|string %}selected{% endif %}>
+            {{ p.display_name }} / {{ p.model_name }}
+          </option>
+          {% endfor %}
+        </select>
+        {% endif %}
+
+        <button type="submit" class="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
+          Simpan Mode
+        </button>
+      </form>
     </div>
+
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="font-semibold text-gray-800"><i class="fa-solid fa-list text-indigo-500"></i> Daftar Provider</h2>
+        <button onclick="toggleAddForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
+          <i class="fa-solid fa-plus"></i> Tambah Provider
+        </button>
+      </div>
+
+      <div id="add-provider-form" class="hidden mb-6">
+        {% include 'settings/provider_form.html' %}
+      </div>
+
+      <div id="provider-list">
+        {% include 'settings/providers_list.html' %}
+      </div>
+    </div>
+
+  </div>
+
+  <div id="pane-scraper" class="tab-pane hidden">
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-spider text-indigo-500"></i> Konfigurasi Scraper</h2>
+      <form hx-post="/settings/scraper" hx-swap="none" hx-on::after-request="showToast('Konfigurasi scraper tersimpan!')" class="space-y-4">
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Keyword Default <span class="text-gray-400 font-normal normal-case">(pisahkan dengan koma)</span></label>
+          <input type="text" name="keywords" value="{{ scraper_config.keywords or '' }}"
+            placeholder="contoh: restoran,cafe,salon,klinik"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Kota/Lokasi Default <span class="text-gray-400 font-normal normal-case">(pisahkan dengan koma)</span></label>
+          <input type="text" name="target_cities" value="{{ scraper_config.target_cities or '' }}"
+            placeholder="contoh: Surabaya,Malang,Sidoarjo"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Max per Hari</label>
+            <input type="number" name="max_per_day" value="{{ scraper_config.max_per_day or 20 }}" min="1" max="100"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Delay Min (detik)</label>
+            <input type="number" name="delay_min_seconds" value="{{ scraper_config.delay_min_seconds or 3 }}" min="1"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Delay Max (detik)</label>
+            <input type="number" name="delay_max_seconds" value="{{ scraper_config.delay_max_seconds or 7 }}" min="1"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-2 rounded-lg transition-colors">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="pane-followup" class="tab-pane hidden">
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-bell text-indigo-500"></i> Konfigurasi Follow-up</h2>
+      <form hx-post="/settings/followup" hx-swap="none" hx-on::after-request="showToast('Konfigurasi follow-up tersimpan!')" class="space-y-4">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Interval Follow-up (hari)</label>
+            <input type="number" name="followup_interval_days" value="{{ settings.get('followup_interval_days', '3') }}" min="1" max="30"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p class="text-xs text-gray-400 mt-1">Tunggu X hari sebelum kirim follow-up</p>
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Max Follow-up</label>
+            <input type="number" name="max_followup" value="{{ settings.get('max_followup', '2') }}" min="1" max="10"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p class="text-xs text-gray-400 mt-1">Setelah X follow-up tanpa respons → COLD</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-2 rounded-lg transition-colors">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="pane-profile" class="tab-pane hidden">
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-user-tie text-indigo-500"></i> Profil Jasa / Agency</h2>
+      <p class="text-sm text-gray-500 mb-4">Informasi ini digunakan sebagai konteks untuk AI saat generate pesan outreach.</p>
+      <form hx-post="/settings/profile" hx-swap="none" hx-on::after-request="showToast('Profil tersimpan!')" class="space-y-4">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Nama Jasa / Agency</label>
+            <input type="text" name="agency_name" value="{{ settings.get('agency_name', '') }}"
+              placeholder="contoh: WebCraft Studio"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Nama Kontak</label>
+            <input type="text" name="contact_name" value="{{ settings.get('contact_name', '') }}"
+              placeholder="contoh: Andi"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">URL Portofolio</label>
+          <input type="url" name="portfolio_url" value="{{ settings.get('portfolio_url', '') }}"
+            placeholder="https://portofolio-saya.com"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Layanan yang Ditawarkan</label>
+          <textarea name="services_offered" rows="3"
+            placeholder="contoh: Pembuatan website, Landing page, Toko online, Redesign website, Google Business..."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">{{ settings.get('services_offered', '') }}</textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Range Harga</label>
+          <input type="text" name="price_range" value="{{ settings.get('price_range', '') }}"
+            placeholder="contoh: mulai dari Rp 1.500.000"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-2 rounded-lg transition-colors">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(el => {
+    el.classList.remove('bg-indigo-600', 'text-white');
+    el.classList.add('text-gray-600', 'hover:bg-gray-50');
+  });
+  document.getElementById('pane-' + name).classList.remove('hidden');
+  const btn = document.getElementById('tab-' + name);
+  btn.classList.add('bg-indigo-600', 'text-white');
+  btn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+}
+
+function toggleAddForm() {
+  const f = document.getElementById('add-provider-form');
+  f.classList.toggle('hidden');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+</script>
+
 {% endblock %}

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><i class="fa-solid fa-spider text-indigo-600"></i> Scraper Google Maps</h1>
+      <p class="text-sm text-gray-500 mt-1">Temukan calon client baru dari Google Maps secara otomatis.</p>
+    </div>
+    <a href="/prospects" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+      <i class="fa-solid fa-arrow-right"></i> Lihat Prospect
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="md:col-span-2 space-y-4">
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h2 class="font-semibold text-gray-800 mb-4"><i class="fa-solid fa-search text-indigo-500"></i> Konfigurasi Pencarian</h2>
+
+        <form id="scraper-form" hx-post="/scraper/start" hx-target="#progress-container" hx-swap="innerHTML"
+          hx-indicator="#scraper-loading" class="space-y-4">
+
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">
+              Keyword Bisnis <span class="text-red-500">*</span>
+              <span class="text-gray-400 font-normal normal-case ml-1">(pisahkan dengan koma)</span>
+            </label>
+            <input type="text" name="keywords" id="keywords"
+              value="{{ config.keywords if config else '' }}"
+              placeholder="restoran, cafe, salon, klinik, hotel"
+              required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p class="text-xs text-gray-400 mt-1">Contoh: <em>restoran sunda, kafe kekinian, salon wanita, klinik gigi</em></p>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">
+              Kota / Lokasi <span class="text-red-500">*</span>
+              <span class="text-gray-400 font-normal normal-case ml-1">(pisahkan dengan koma)</span>
+            </label>
+            <input type="text" name="cities" id="cities"
+              value="{{ config.target_cities if config else '' }}"
+              placeholder="Surabaya, Malang, Sidoarjo, Gresik"
+              required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p class="text-xs text-gray-400 mt-1">Semakin spesifik semakin baik: <em>Surabaya Pusat, Malang Kota</em></p>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-1">Max Hasil per Hari</label>
+            <div class="flex items-center gap-3">
+              <input type="range" name="max_per_day" id="max-range"
+                min="5" max="100" step="5"
+                value="{{ config.max_per_day if config else 20 }}"
+                oninput="document.getElementById('max-display').textContent = this.value"
+                class="flex-1 accent-indigo-600">
+              <span id="max-display" class="text-sm font-bold text-indigo-600 w-8">{{ config.max_per_day if config else 20 }}</span>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            
+            <button type="submit" id="start-btn"
+              class="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors shadow-sm {% if state.running %}hidden{% endif %}"
+              onclick="toggleButtons(true)">
+              <i class="fa-solid fa-play"></i> Mulai Scraping
+            </button>
+
+            <span id="scraper-loading" class="htmx-indicator flex-1 flex items-center justify-center gap-2 bg-indigo-100 text-indigo-700 font-medium py-2.5 rounded-lg">
+              <i class="fa-solid fa-spinner fa-spin"></i> Menginisialisasi...
+            </span>
+
+            <button type="button" id="stop-btn"
+              hx-post="/scraper/stop" hx-swap="none"
+              class="{% if not state.running %}hidden{% endif %} flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2.5 rounded-lg transition-colors shadow-sm">
+              <i class="fa-solid fa-stop"></i> Stop
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="progress-container">
+        {% if state.running %}
+          {% include 'scraper/progress.html' %}
+        {% else %}
+          
+          <div class="bg-gray-50 rounded-xl p-8 text-center border border-dashed border-gray-200">
+            <i class="fa-solid fa-spider text-gray-300 text-4xl mb-3"></i>
+            <p class="text-gray-400 text-sm">Scraper belum berjalan. Isi form di atas dan klik <strong>Mulai Scraping</strong>.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <div class="space-y-4">
+
+      <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <h3 class="font-semibold text-sm text-gray-800 mb-3"><i class="fa-solid fa-chart-bar text-indigo-500"></i> Statistik</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Prospect hari ini</span>
+            <span class="font-bold text-indigo-600">{{ today_count }}</span>
+          </div>
+          {% if config %}
+          <div class="flex justify-between">
+            <span class="text-gray-500">Max per hari</span>
+            <span class="font-bold">{{ config.max_per_day or 20 }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="bg-indigo-50 rounded-xl p-5 border border-indigo-100">
+        <h3 class="font-semibold text-sm text-indigo-800 mb-2"><i class="fa-solid fa-lightbulb text-yellow-500"></i> Tips Scraping</h3>
+        <ul class="text-xs text-indigo-700 space-y-1.5">
+          <li>• Gunakan keyword spesifik untuk hasil lebih akurat</li>
+          <li>• Pisahkan keyword dan kota dengan <strong>koma</strong></li>
+          <li>• Pastikan koneksi internet stabil</li>
+          <li>• Jangan tutup browser saat scraping berjalan</li>
+          <li>• Scraper akan otomatis skip data yang sudah ada</li>
+        </ul>
+      </div>
+
+      {% if history %}
+      <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <h3 class="font-semibold text-sm text-gray-800 mb-3"><i class="fa-solid fa-clock-rotate-left text-gray-400"></i> Riwayat Scraping</h3>
+        <div class="space-y-2">
+          {% for h in history %}
+          <div class="text-xs border-b border-gray-50 pb-2 last:border-0">
+            <p class="font-medium text-gray-700">{{ h.keyword }} @ {{ h.city }}</p>
+            <p class="text-gray-400">
+              Ditemukan: <strong>{{ h.total_found }}</strong> · Disimpan: <strong>{{ h.total_saved }}</strong>
+              &nbsp;·&nbsp; {{ h.scraped_at.strftime('%d/%m %H:%M') if h.scraped_at else '-' }}
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleButtons(running) {
+  const startBtn = document.getElementById('start-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  if (running) {
+    startBtn && startBtn.classList.add('hidden');
+    stopBtn && stopBtn.classList.remove('hidden');
+  } else {
+    startBtn && startBtn.classList.remove('hidden');
+    stopBtn && stopBtn.classList.add('hidden');
+  }
+}
+
+// Auto-refresh progress every 3 seconds while running
+function startProgressPolling() {
+  const interval = setInterval(() => {
+    const progressEl = document.getElementById('progress-container');
+    if (!progressEl) { clearInterval(interval); return; }
+    // Only poll if the progress pane is visible
+    if (progressEl.querySelector('#progress-running')) {
+      htmx.ajax('GET', '/scraper/progress', {target: '#progress-container', swap: 'innerHTML'});
+    } else {
+      clearInterval(interval);
+      toggleButtons(false);
+    }
+  }, 3000);
+}
+
+document.addEventListener('htmx:afterSwap', (e) => {
+  if (e.target.id === 'progress-container' && document.getElementById('progress-running')) {
+    startProgressPolling();
+  }
+});
+</script>
+
+{% endblock %}

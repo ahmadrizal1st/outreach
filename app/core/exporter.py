@@ -35,14 +35,12 @@ class DataExporter:
         ws = wb.active
         ws.title = "Prospects"
 
-        # Header
         headers = [
             'Nama', 'Kategori', 'Kota', 'Telepon', 'Website', 'Rating', 'Review',
             'Tier', 'Score', 'Status'
         ]
         ws.append(headers)
 
-        # Data
         for prospect in prospects:
             ws.append([
                 prospect['name'],

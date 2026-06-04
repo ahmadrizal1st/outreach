@@ -41,7 +41,7 @@ class FollowupTracker:
         }
 
     def get_followups_today(self) -> list:
-        # Join prospect, pipeline, prospect_scores
+        
         results = self.db.query(Prospect, Pipeline, ProspectScore).join(
             Pipeline, Prospect.id == Pipeline.prospect_id
         ).join(

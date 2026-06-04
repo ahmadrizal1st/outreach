@@ -35,7 +35,6 @@ class BusinessAnalyzer:
             clean = clean.replace('```', '')
             analysis = json.loads(clean)
 
-            # Update prospect_scores dengan analisis
             self._save_analysis(prospect_id, analysis)
             return analysis
 

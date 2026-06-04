@@ -19,13 +19,11 @@
     </span>
   </div>
 
-  <!-- AI Summary -->
   <div class="bg-indigo-50 rounded-lg p-3 mt-4 border border-indigo-100">
     <p class="text-xs text-indigo-600 uppercase font-semibold mb-1"><i class="fa-solid fa-robot"></i> AI Summary</p>
     <p class="text-gray-700 leading-relaxed text-sm">{{ review.website_summary or 'Tidak ada summary' }}</p>
   </div>
 
-  <!-- Issues List -->
   {% if review.website_issues %}
   <div class="pt-2">
     <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Issues Terdeteksi</p>
@@ -40,7 +38,6 @@
   </div>
   {% endif %}
 
-  <!-- Konfirmasi Manual -->
   <div class="border-t border-gray-100 pt-4 mt-4">
     {% include 'review/form.html' %}
   </div>

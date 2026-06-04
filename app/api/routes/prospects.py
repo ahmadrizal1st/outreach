@@ -1,22 +1,68 @@
+"""
+Prospects route — list, filter, detail, and full CRUD for manual prospects.
+"""
+import logging
 from fastapi import APIRouter, Request, Depends, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
 
 from app.core.database import get_db
 from app.models.prospect import Prospect, ProspectScore, Pipeline
+from app.scraper.normalizer import DataNormalizer
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
 templates = Jinja2Templates(directory=templates_dir)
 
+normalizer = DataNormalizer()
+
+PIPELINE_STATUSES = [
+    {"value": "belum_dihubungi", "label": "Belum Dihubungi"},
+    {"value": "sudah_dihubungi", "label": "Sudah Dihubungi"},
+    {"value": "perlu_followup", "label": "Perlu Follow-up"},
+    {"value": "dibalas", "label": "Dibalas"},
+    {"value": "deal", "label": "Deal"},
+    {"value": "tidak_tertarik", "label": "Tidak Tertarik"},
+]
+
+CATEGORIES = [
+    "Restoran", "Cafe", "Salon", "Klinik", "Hotel",
+    "Toko", "Apotek", "Barbershop", "Gym", "Studio Foto",
+    "Wedding Organizer", "Catering", "Jasa", "Lainnya"
+]
+
+def _prospect_to_card_dict(p: Prospect, s: ProspectScore = None) -> dict:
+    return {
+        "id": p.id,
+        "name": p.name,
+        "category": p.category,
+        "city": p.city,
+        "address": p.address,
+        "rating": p.rating,
+        "review_count": p.review_count,
+        "phone_raw": p.phone_raw,
+        "phone_normalized": p.phone_normalized,
+        "website": p.website,
+        "is_manual": getattr(p, 'is_manual', False),
+        "priority_tier": s.priority_tier if s else None,
+        "priority_score": s.priority_score if s else None,
+    }
+
 @router.get("/", response_class=HTMLResponse)
 async def page_prospects(request: Request, db: Session = Depends(get_db)):
-    # Render main page. HTMX will load the filter list.
-    prospects = db.query(Prospect).limit(20).all() # default initial load
-    return templates.TemplateResponse(request=request, name="prospects/list.html", context={"request": request, "prospects": prospects})
+    prospects_q = db.query(Prospect, ProspectScore).outerjoin(
+        ProspectScore, Prospect.id == ProspectScore.prospect_id
+    ).limit(20).all()
+    prospects = [_prospect_to_card_dict(p, s) for p, s in prospects_q]
+    return templates.TemplateResponse(
+        request=request,
+        name="prospects/list.html",
+        context={"request": request, "prospects": prospects, "categories": CATEGORIES},
+    )
 
 @router.get("/filter", response_class=HTMLResponse)
 async def filter_prospects(
@@ -25,7 +71,7 @@ async def filter_prospects(
     category: str = "",
     status: str = "",
     search: str = "",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     query = db.query(Prospect, ProspectScore, Pipeline).outerjoin(
         ProspectScore, Prospect.id == ProspectScore.prospect_id
@@ -38,68 +84,152 @@ async def filter_prospects(
     if category:
         query = query.filter(Prospect.category == category)
     if status:
-        if status in ['raw', 'scored']:
+        if status in ("raw", "scored"):
             query = query.filter(Prospect.status == status)
         else:
             query = query.filter(Pipeline.contact_status == status)
     if search:
         query = query.filter(Prospect.name.ilike(f"%{search}%"))
 
-    results = query.limit(50).all()
-    
-    # Map to list of dicts for the card template
+    results = query.limit(100).all()
+
     prospects = []
     for p, s, pl in results:
-        prospects.append({
-            "id": p.id,
-            "name": p.name,
-            "category": p.category,
-            "city": p.city,
-            "address": p.address,
-            "rating": p.rating,
-            "review_count": p.review_count,
-            "phone_raw": p.phone_raw,
-            "phone_normalized": p.phone_normalized,
-            "website": p.website,
-            "priority_tier": s.priority_tier if s else None,
-            "priority_score": s.priority_score if s else None
-        })
+        d = _prospect_to_card_dict(p, s)
+        prospects.append(d)
 
     return templates.TemplateResponse(
         request=request,
-        name="partials/prospect_card.html" if len(prospects) == 1 else "prospects/list.html", 
-        context={"request": request, "prospects": prospects}
+        name="prospects/list_partial.html",
+        context={"request": request, "prospects": prospects},
     )
 
-@router.get("/{id}", response_class=HTMLResponse)
-async def prospect_detail(request: Request, id: int, db: Session = Depends(get_db)):
-    prospect = db.query(Prospect).filter(Prospect.id == id).first()
-    score = db.query(ProspectScore).filter(ProspectScore.prospect_id == id).first()
-    pipeline = db.query(Pipeline).filter(Pipeline.prospect_id == id).first()
-    
-    # Defaults/Placeholders for Phase 5 & 6
-    review = None 
-    message = None
-    message_history = []
-    
-    pipeline_statuses = [
-        {"value": "belum_dihubungi", "label": "Belum Dihubungi"},
-        {"value": "sudah_dihubungi", "label": "Sudah Dihubungi"},
-        {"value": "perlu_followup", "label": "Perlu Follow-up"},
-        {"value": "dibalas", "label": "Dibalas"},
-        {"value": "deal", "label": "Deal"},
-        {"value": "tidak_tertarik", "label": "Tidak Tertarik"}
-    ]
+@router.get("/new", response_class=HTMLResponse)
+async def new_prospect_form(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="prospects/form.html",
+        context={"request": request, "prospect": None, "categories": CATEGORIES, "edit_mode": False},
+    )
 
-    context = {
-        "request": request,
-        "prospect": prospect,
-        "score": score,
-        "pipeline": pipeline,
-        "review": review,
-        "message": message,
-        "message_history": message_history,
-        "pipeline_statuses": pipeline_statuses
-    }
-    
-    return templates.TemplateResponse(request=request, name="prospects/detail.html", context=context)
+@router.get("/{prospect_id}/edit", response_class=HTMLResponse)
+async def edit_prospect_form(request: Request, prospect_id: int, db: Session = Depends(get_db)):
+    prospect = db.query(Prospect).filter(Prospect.id == prospect_id).first()
+    if not prospect:
+        return RedirectResponse("/prospects", status_code=302)
+    return templates.TemplateResponse(
+        request=request,
+        name="prospects/form.html",
+        context={"request": request, "prospect": prospect, "categories": CATEGORIES, "edit_mode": True},
+    )
+
+@router.get("/{prospect_id}", response_class=HTMLResponse)
+async def prospect_detail(request: Request, prospect_id: int, db: Session = Depends(get_db)):
+    from app.models.prospect import WebsiteReview, Message
+    prospect = db.query(Prospect).filter(Prospect.id == prospect_id).first()
+    if not prospect:
+        return RedirectResponse("/prospects", status_code=302)
+
+    score = db.query(ProspectScore).filter(ProspectScore.prospect_id == prospect_id).first()
+    pipeline = db.query(Pipeline).filter(Pipeline.prospect_id == prospect_id).first()
+    review = db.query(WebsiteReview).filter(WebsiteReview.prospect_id == prospect_id).first()
+    message = db.query(Message).filter(
+        Message.prospect_id == prospect_id, Message.is_sent == True
+    ).order_by(Message.created_at.desc()).first()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="prospects/detail.html",
+        context={
+            "request": request,
+            "prospect": prospect,
+            "score": score,
+            "pipeline": pipeline,
+            "review": review,
+            "message": message,
+            "pipeline_statuses": PIPELINE_STATUSES,
+        },
+    )
+
+@router.post("/create", response_class=HTMLResponse)
+async def create_prospect(
+    request: Request,
+    name: str = Form(...),
+    category: str = Form(""),
+    city: str = Form(""),
+    address: str = Form(""),
+    phone_raw: str = Form(""),
+    website: str = Form(""),
+    email: str = Form(""),
+    instagram_url: str = Form(""),
+    notes: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    phone_normalized = normalizer.normalize_phone(phone_raw) if phone_raw else None
+    website_clean = normalizer.normalize_url(website) if website else None
+
+    prospect = Prospect(
+        name=name.strip(),
+        category=category.strip() or "Lainnya",
+        city=city.strip(),
+        address=address.strip() or None,
+        phone_raw=phone_raw.strip() or None,
+        phone_normalized=phone_normalized,
+        website=website_clean,
+        instagram_url=instagram_url.strip() or None,
+        status="raw",
+        source_keyword="manual",
+        source_city=city.strip(),
+        place_id=f"manual_{name.strip().lower().replace(' ', '_')}_{city.strip().lower()}",
+    )
+    db.add(prospect)
+    db.commit()
+    db.refresh(prospect)
+
+    logger.info(f"Created manual prospect: {prospect.name} (id={prospect.id})")
+    return RedirectResponse(f"/prospects/{prospect.id}", status_code=302)
+
+@router.post("/{prospect_id}/update", response_class=HTMLResponse)
+async def update_prospect(
+    request: Request,
+    prospect_id: int,
+    name: str = Form(...),
+    category: str = Form(""),
+    city: str = Form(""),
+    address: str = Form(""),
+    phone_raw: str = Form(""),
+    website: str = Form(""),
+    email: str = Form(""),
+    instagram_url: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    prospect = db.query(Prospect).filter(Prospect.id == prospect_id).first()
+    if not prospect:
+        return RedirectResponse("/prospects", status_code=302)
+
+    prospect.name = name.strip()
+    prospect.category = category.strip() or prospect.category
+    prospect.city = city.strip()
+    prospect.address = address.strip() or None
+    prospect.phone_raw = phone_raw.strip() or None
+    prospect.phone_normalized = normalizer.normalize_phone(phone_raw) if phone_raw else prospect.phone_normalized
+    prospect.website = normalizer.normalize_url(website) if website else None
+    prospect.instagram_url = instagram_url.strip() or None
+
+    db.commit()
+    logger.info(f"Updated prospect id={prospect_id}")
+    return RedirectResponse(f"/prospects/{prospect_id}", status_code=302)
+
+@router.post("/{prospect_id}/delete", response_class=HTMLResponse)
+async def delete_prospect(request: Request, prospect_id: int, db: Session = Depends(get_db)):
+    from app.models.prospect import ProspectScore, Pipeline, WebsiteReview, Message
+
+    db.query(Message).filter(Message.prospect_id == prospect_id).delete()
+    db.query(WebsiteReview).filter(WebsiteReview.prospect_id == prospect_id).delete()
+    db.query(Pipeline).filter(Pipeline.prospect_id == prospect_id).delete()
+    db.query(ProspectScore).filter(ProspectScore.prospect_id == prospect_id).delete()
+    db.query(Prospect).filter(Prospect.id == prospect_id).delete()
+    db.commit()
+
+    logger.info(f"Deleted prospect id={prospect_id}")
+    return RedirectResponse("/prospects", status_code=302)

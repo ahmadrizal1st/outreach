@@ -13,12 +13,12 @@ class RateLimiter:
         await asyncio.sleep(delay)
 
     async def wait_between_pages(self):
-        # Lebih lama antar halaman
+        
         delay = random.uniform(15, 30)
         await asyncio.sleep(delay)
 
     async def wait_between_sessions(self):
-        # Paling lama antar keyword/kota
+        
         delay = random.uniform(120, 300)
         await asyncio.sleep(delay)
 

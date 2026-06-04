@@ -11,18 +11,16 @@ from app.models.prospect import Prospect, ProspectScore, LLMProvider, Pipeline
 
 router = APIRouter()
 
-# Setup templates
 templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
 templates = Jinja2Templates(directory=templates_dir)
 
 @router.get("/", response_class=HTMLResponse)
 async def read_dashboard(request: Request, db: Session = Depends(get_db)):
-    # Calculate stats
+    
     total_prospects = db.query(Prospect).count()
     hot = db.query(ProspectScore).filter(ProspectScore.priority_tier == 'HOT').count()
     warm = db.query(ProspectScore).filter(ProspectScore.priority_tier == 'WARM').count()
-    
-    # Calculate contacted today
+
     today = date.today()
     contacted_today = db.query(Pipeline).filter(
         func.date(Pipeline.contacted_at) == today
@@ -35,12 +33,6 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db)):
         "contacted_today": contacted_today
     }
 
-    # Top 10 logic
-    # Find prospects not blacklisted, not contacted (contact_status = 'belum_dihubungi' or no pipeline entry)
-    # Order by priority_score DESC, review_count DESC
-    # Ensure they have a phone number (normalized)
-    
-    # SQL equivalent logic
     top10_query = (
         db.query(Prospect, ProspectScore, Pipeline)
         .join(ProspectScore, Prospect.id == ProspectScore.prospect_id)
@@ -61,7 +53,7 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db)):
 
     top10 = []
     for prospect, score, pipeline in top10_query:
-        # Build dict for template
+        
         top10.append({
             "id": prospect.id,
             "name": prospect.name,
@@ -76,15 +68,12 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db)):
             "pitch_angle": score.pitch_angle
         })
 
-    # Follow-ups summary using Phase 7 logic
     from app.followup.notifier import FollowupNotifier
     notifier = FollowupNotifier()
     summary = notifier.get_summary()
 
-    # Providers status
     providers = db.query(LLMProvider).all()
 
-    # Scraper status mock
     scraper = {
         "today": 0,
         "max": 20

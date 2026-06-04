@@ -5,12 +5,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Ensure data directory exists
 os.makedirs(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data")), exist_ok=True)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/database.sqlite")
 
-# For SQLite, check_same_thread=False is needed if passing the connection across threads
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_engine(

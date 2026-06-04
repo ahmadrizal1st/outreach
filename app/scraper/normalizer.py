@@ -5,9 +5,9 @@ class DataNormalizer:
     def normalize_phone(self, phone: str) -> str:
         if not phone:
             return None
-        # Hapus semua non-digit
+        
         digits = re.sub(r'\D', '', phone)
-        # Konversi ke format internasional
+        
         if digits.startswith('0'):
             digits = '62' + digits[1:]
         elif not digits.startswith('62'):

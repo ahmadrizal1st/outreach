@@ -1,15 +1,15 @@
 import json
 from urllib.parse import quote
+from sqlalchemy.orm import Session
 from app.ai.provider import LLMProvider
 from app.ai.prompts.message_first import get_first_message_prompt
 from app.ai.prompts.message_followup import get_followup_message_prompt
-from app.core.database import get_db
 from app.models.prospect import Prospect, ProspectScore, WebsiteReview, Message
 
 class MessageGenerator:
-    def __init__(self, manual_provider=None):
-        self.provider = LLMProvider(manual_provider)
-        self.db = next(get_db())
+    def __init__(self, db: Session, manual_provider: str = None):
+        self.db = db
+        self.provider = LLMProvider(db, manual_provider)
 
     async def generate_first(self, prospect_id: int) -> dict:
         prospect = self._get_prospect(prospect_id)
@@ -19,7 +19,6 @@ class MessageGenerator:
         if not prospect or not score:
             return {"error": "Data tidak lengkap (Prospect atau Score tidak ditemukan)"}
 
-        # Format dictionaries
         prospect_dict = {
             "name": prospect.name,
             "category": prospect.category,
@@ -45,13 +44,11 @@ class MessageGenerator:
         if not variants:
             return {"error": "Gagal generate pesan"}
 
-        # Delete previous drafts
         self.db.query(Message).filter(Message.prospect_id == prospect_id, Message.status == 'draft').delete()
         self.db.commit()
 
         saved_ids = self._save_variants(prospect_id, variants, sequence=0)
 
-        # Retrieve saved messages to pass ID to UI
         saved_messages = self.db.query(Message).filter(Message.id.in_(saved_ids)).all()
 
         return {
@@ -87,7 +84,6 @@ class MessageGenerator:
         if not variants:
             return {"error": "Gagal generate pesan"}
 
-        # Clear drafts
         self.db.query(Message).filter(Message.prospect_id == prospect_id, Message.status == 'draft').delete()
         self.db.commit()
 
@@ -113,7 +109,6 @@ class MessageGenerator:
             msg.sent_at = datetime.now()
             self.db.commit()
 
-            # Discard other drafts for the same sequence
             self.db.query(Message).filter(
                 Message.prospect_id == msg.prospect_id,
                 Message.sequence == msg.sequence,

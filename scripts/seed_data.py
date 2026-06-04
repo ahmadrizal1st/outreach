@@ -9,7 +9,7 @@ from app.models.prospect import Prospect, LLMProvider, ScraperConfig
 def seed():
     db = SessionLocal()
     try:
-        # Seed prospects
+        
         samples = [SAMPLE_PROSPECT, SAMPLE_PROSPECT_WITH_WEBSITE]
         for sample in samples:
             existing = db.query(Prospect).filter(Prospect.place_id == sample['place_id']).first()
@@ -18,7 +18,6 @@ def seed():
                 db.add(p)
         db.commit()
 
-        # Seed LLM providers
         existing_provider = db.query(LLMProvider).filter(LLMProvider.provider_name == 'gemini').first()
         if not existing_provider:
             provider1 = LLMProvider(
@@ -44,7 +43,6 @@ def seed():
             db.add(provider2)
         db.commit()
 
-        # Seed scraper config
         existing_config = db.query(ScraperConfig).first()
         if not existing_config:
             config = ScraperConfig(

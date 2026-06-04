@@ -11,12 +11,11 @@ class BusinessScorer:
         self.provider = LLMProvider(db, manual_provider)
 
     async def score_prospect(self, prospect_id: int) -> dict:
-        # Ambil data prospect
+        
         prospect = self._get_prospect(prospect_id)
         if not prospect:
             return {"error": "Prospect tidak ditemukan"}
 
-        # Ubah SQLAlchemy model ke dictionary
         prospect_dict = {
             "name": prospect.name,
             "category": prospect.category,
@@ -27,22 +26,18 @@ class BusinessScorer:
             "phone_normalized": prospect.phone_normalized
         }
 
-        # Generate scoring
         score_data = await self._get_score(prospect_dict)
         if not score_data:
             return {"error": "Scoring gagal"}
 
-        # Simpan hasil
         self._save_score(prospect_id, score_data)
 
-        # Update status prospect
         self._update_prospect_status(prospect_id, 'scored')
 
         return score_data
 
     async def score_all_unscored(self) -> dict:
-        # Ambil semua prospect yang belum di-score (Left outer join / where not exists)
-        # Atau cukup filter berdasarkan status 'raw' jika itu artinya belum discore
+
         prospects = self.db.query(Prospect).outerjoin(
             ProspectScore, Prospect.id == ProspectScore.prospect_id
         ).filter(
@@ -73,9 +68,9 @@ class BusinessScorer:
             response = await self.provider.complete(messages)
             if not response:
                 return None
-            # Parse JSON response
+            
             clean = response.strip()
-            # Hapus markdown jika ada
+            
             clean = clean.replace('```json', '')
             clean = clean.replace('```', '')
             return json.loads(clean)

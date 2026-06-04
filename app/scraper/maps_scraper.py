@@ -28,8 +28,7 @@ class MapsScraper:
         raw_data['rating'] = self.normalizer.normalize_rating(raw_data.get('rating'))
         raw_data['review_count'] = self.normalizer.normalize_review_count(raw_data.get('review_count'))
         raw_data['website'] = self.normalizer.normalize_url(raw_data.get('website'))
-        
-        # Ekstrak place_id dari url google maps
+
         place_id_match = raw_data.get('google_maps_url', '').split('!')
         if len(place_id_match) > 1:
             raw_data['place_id'] = place_id_match[-1]
@@ -38,14 +37,13 @@ class MapsScraper:
             
         return raw_data
 
-    async def scrape(self, keyword: str, city: str):
+    async def scrape(self, keyword: str, city: str, stop_flag: dict = None):
         async with async_playwright() as p:
             browser = await p.chromium.launch(
                 headless=True,
                 args=['--no-sandbox']
             )
             context = await browser.new_context(
-                # Simpan session
                 storage_state="browser_profile.json" if self._profile_exists() else None,
                 viewport={
                     'width': random.randint(1200, 1400),
@@ -55,21 +53,20 @@ class MapsScraper:
             )
             page = await context.new_page()
 
-            # Buka Google Maps
             query = f"{keyword} {city}"
             url = f"https://www.google.com/maps/search/{query}"
             await page.goto(url)
             await page.wait_for_load_state('networkidle')
 
-            # Scroll untuk load semua listing
             await self._scroll_listings(page)
 
-            # Ambil semua listing
-            listings = await page.query_selector_all(
-                'div.Nv2PK'
-            )
+            listings = await page.query_selector_all('div.Nv2PK')
 
             for listing in listings:
+                
+                if stop_flag and stop_flag.get("should_stop"):
+                    break
+
                 if self.limiter.is_daily_limit_reached():
                     break
 
@@ -77,18 +74,13 @@ class MapsScraper:
                 await page.wait_for_load_state('networkidle')
                 await self.limiter.wait()
 
-                # Parse detail
                 raw_data = await self.parser.parse(page)
                 raw_data['source_keyword'] = keyword
                 raw_data['source_city'] = city
 
-                # Normalisasi
                 data = self._normalize(raw_data)
 
-                # Skip jika duplikat
-                if self.deduplicator.is_duplicate(
-                    data.get('place_id')
-                ):
+                if self.deduplicator.is_duplicate(data.get('place_id')):
                     continue
 
                 self.results.append(data)
@@ -99,22 +91,20 @@ class MapsScraper:
             await browser.close()
             return self.results
 
-    async def _scroll_listings(self, page):
-        # Scroll panel kiri untuk load semua listing
+    async def _scroll_listings(self, page, max_attempts: int = 25):
+        """Scroll the listings panel to load more, with max_attempts limit."""
         panel = await page.query_selector('div[role="feed"]')
         if panel:
             prev_count = 0
-            while True:
-                await panel.evaluate(
-                    'el => el.scrollTop += 1000'
-                )
+            attempts = 0
+            while attempts < max_attempts:
+                await panel.evaluate('el => el.scrollTop += 1000')
                 await asyncio.sleep(2)
-                listings = await page.query_selector_all(
-                    'div.Nv2PK'
-                )
+                listings = await page.query_selector_all('div.Nv2PK')
                 if len(listings) == prev_count:
                     break
                 prev_count = len(listings)
+                attempts += 1
 
     def _random_user_agent(self):
         agents = [

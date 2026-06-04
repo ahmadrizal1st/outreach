@@ -5,57 +5,44 @@ class DetailParser:
     async def parse(self, page: Page) -> dict:
         data = {}
 
-        # Nama bisnis
         data['name'] = await self._get_text(
             page, 'h1.DUwDvf'
         )
 
-        # Kategori
         data['category'] = await self._get_text(
             page, 'button.DkEaL'
         )
 
-        # Rating
         data['rating'] = await self._get_text(
             page, 'div.F7nice span'
         )
 
-        # Jumlah review
         data['review_count'] = await self._get_text(
             page, 'div.F7nice span[aria-label]'
         )
 
-        # Alamat
         data['address'] = await self._get_text(
             page, 'button[data-item-id="address"]'
         )
 
-        # Telepon
         data['phone_raw'] = await self._get_text(
             page, 'button[data-item-id^="phone"]'
         )
 
-        # Website
         data['website'] = await self._get_attr(
             page, 'a[data-item-id="authority"]', 'href'
         )
 
-        # Jam operasional
         data['hours'] = await self._get_hours(page)
 
-        # Google Maps URL
         data['google_maps_url'] = page.url
 
-        # Foto
         data['photo_urls'] = await self._get_photos(page)
 
-        # Status Klaim Bisnis
         data['is_claimed'] = await self._check_is_claimed(page)
-        
-        # Instagram URL
+
         data['instagram_url'] = await self._get_instagram(page)
-        
-        # About Summary
+
         data['about_summary'] = await self._get_about_summary(page)
 
         return data
@@ -79,7 +66,7 @@ class DetailParser:
         return None
 
     async def _get_hours(self, page):
-        # Extract jam operasional sebagai JSON string
+        
         try:
             hours = {}
             rows = await page.query_selector_all(

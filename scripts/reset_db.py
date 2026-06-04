@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.core.database import Base, engine
-from app.models import prospect  # Import so Base knows about models
+from app.models import prospect  
 
 def reset():
     confirm = input("[WARNING] Reset database? Semua data akan hilang. (y/n): ")
@@ -16,7 +16,6 @@ def reset():
         os.remove(db_path)
         print("[SUCCESS] Database direset")
 
-    # Recreate tables
     Base.metadata.create_all(bind=engine)
     print("[SUCCESS] Tabel dibuat ulang")
 

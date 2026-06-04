@@ -55,22 +55,22 @@ Buat 3 variasi dengan tone berbeda:
 3. Kasual — santai seperti kenalan
 
 Format response:
-{{
+{ 
   "variants": [
-    {{
+    { 
       "tone": "formal",
       "message": "..."
-    }},
-    {{
+    } ,
+    { 
       "tone": "semi-formal",
       "message": "..."
-    }},
-    {{
+    } ,
+    { 
       "tone": "kasual",
       "message": "..."
-    }}
+    } 
   ]
-}}
+} 
 """
 
     return [
