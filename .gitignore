@@ -63,7 +63,7 @@ venv.bak/
 # SQLite databases
 *.sqlite3
 *.db
-data/database.db
+data/database.sqlite
 
 # IDEs
 .vscode/
