@@ -1,39 +1,39 @@
-import os
-import sys
+import pytest
+from app.core.database import SessionLocal
+from app.models.prospect import Prospect, Pipeline
+from tests.fixtures.prospect_sample import SAMPLE_PROSPECT
 
-# Add project root to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from app.core.database import Base, engine, SessionLocal
-from app.models.prospect import Prospect
-
-def init_db():
-    print("Creating database and tables...")
-    # Ensure data directory exists
-    os.makedirs(os.path.join(os.path.dirname(__file__), "..", "data"), exist_ok=True)
-    
-    Base.metadata.create_all(bind=engine)
-    print("Tables created successfully!")
-
-    print("Seeding dummy data...")
+def test_insert_prospect():
     db = SessionLocal()
-    
-    # Check if we already have dummy data
-    if db.query(Prospect).count() == 0:
-        dummy_prospect = Prospect(
-            place_id="ChIJN1t_tDeuEmsRUsoyG83frY4",
-            name="Dummy Cafe",
-            category="Restaurant",
-            address="123 Dummy Street",
-            city="Jakarta"
-        )
-        db.add(dummy_prospect)
-        db.commit()
-        print("Dummy data seeded!")
-    else:
-        print("Data already exists. Skipping seed.")
-        
-    db.close()
+    try:
+        existing = db.query(Prospect).filter(Prospect.place_id == SAMPLE_PROSPECT['place_id']).first()
+        if existing:
+            db.delete(existing)
+            db.commit()
 
-if __name__ == "__main__":
-    init_db()
+        prospect = Prospect(**SAMPLE_PROSPECT)
+        db.add(prospect)
+        db.commit()
+
+        result = db.query(Prospect).filter(Prospect.place_id == SAMPLE_PROSPECT['place_id']).first()
+        assert result is not None
+        assert result.name == SAMPLE_PROSPECT['name']
+    finally:
+        db.close()
+
+def test_pipeline_creation():
+    db = SessionLocal()
+    try:
+        prospect = db.query(Prospect).filter(Prospect.place_id == SAMPLE_PROSPECT['place_id']).first()
+        if prospect:
+            existing_pipeline = db.query(Pipeline).filter(Pipeline.prospect_id == prospect.id).first()
+            if not existing_pipeline:
+                pipeline = Pipeline(prospect_id=prospect.id, contact_status='belum_dihubungi')
+                db.add(pipeline)
+                db.commit()
+
+            pipeline = db.query(Pipeline).filter(Pipeline.prospect_id == prospect.id).first()
+            assert pipeline is not None
+            assert pipeline.contact_status == 'belum_dihubungi'
+    finally:
+        db.close()
