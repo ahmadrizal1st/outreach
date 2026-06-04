@@ -115,19 +115,19 @@ Semua proses berjalan di laptop/PC sendiri tanpa perlu server publik. Data tersi
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  Docker Compose                      │
+│                  Docker Compose                     │
 │                                                     │
 │  ┌──────────────────────┐  ┌─────────────────────┐  │
-│  │  Service: app         │  │  Service: scraper   │  │
-│  │  FastAPI + HTMX       │◄─┤  Playwright         │  │
-│  │  Port: 8000           │  │  Chromium headless  │  │
+│  │  Service: app        │  │  Service: scraper   │  │
+│  │  FastAPI + HTMX      │◄─┤  Playwright         │  │
+│  │  Port: 8000          │  │  Chromium headless  │  │
 │  └──────────┬───────────┘  └─────────────────────┘  │
-│             │                                        │
+│             │                                       │
 │  ┌──────────▼───────────┐                           │
-│  │  Volume: ./data/      │                           │
-│  │  - database.db        │                           │
-│  │  - previews/          │                           │
-│  │  - exports/           │                           │
+│  │  Volume: ./data/     │                           │
+│  │  - database.db       │                           │
+│  │  - previews/         │                           │
+│  │  - exports/          │                           │
 │  └──────────────────────┘                           │
 └─────────────────────────────────────────────────────┘
          │                        │

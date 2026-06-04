@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Filter Bar -->
+<div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6">
+  <div class="flex flex-col md:flex-row gap-4 items-center">
+    
+    <div class="w-full md:w-auto flex gap-3 flex-wrap flex-1">
+      <!-- Filter Tier -->
+      <select hx-get="/prospects/filter" hx-trigger="change" hx-target="#prospect-list" name="tier" class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">Semua Tier</option>
+        <option value="HOT">🔥 HOT</option>
+        <option value="WARM">🟡 WARM</option>
+        <option value="COLD">🔵 COLD</option>
+      </select>
+
+      <!-- Filter Industri -->
+      <select hx-get="/prospects/filter" hx-trigger="change" hx-target="#prospect-list" name="category" class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">Semua Industri</option>
+        <option value="Restoran">Restoran</option>
+        <option value="Cafe">Cafe</option>
+        <option value="Salon">Salon</option>
+        <option value="Klinik">Klinik</option>
+        <option value="Hotel">Hotel</option>
+      </select>
+
+      <!-- Filter Status -->
+      <select hx-get="/prospects/filter" hx-trigger="change" hx-target="#prospect-list" name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">Semua Status</option>
+        <option value="raw">Raw</option>
+        <option value="scored">Scored</option>
+        <option value="belum_dihubungi">Belum Dihubungi</option>
+        <option value="sudah_dihubungi">Sudah Dihubungi</option>
+        <option value="dibalas">Dibalas</option>
+        <option value="deal">Deal ✅</option>
+      </select>
+    </div>
+
+    <!-- Search -->
+    <div class="w-full md:w-64">
+      <input type="text" name="search" placeholder="Cari nama bisnis..." hx-get="/prospects/filter" hx-trigger="keyup changed delay:500ms" hx-target="#prospect-list" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    </div>
+  </div>
+</div>
+
+<!-- Prospect List Container -->
+<div id="prospect-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for prospect in prospects %}
+    {% include 'partials/prospect_card.html' %}
+  {% else %}
+    <div class="col-span-full py-12 text-center text-gray-500">
+      Tidak ada prospect yang ditemukan.
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

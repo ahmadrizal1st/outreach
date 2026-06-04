@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="mb-6 flex justify-between items-center">
+  <h1 class="text-2xl font-bold text-gray-900">Pipeline Board</h1>
+</div>
+
+<div class="flex gap-4 overflow-x-auto pb-4 items-start snap-x snap-mandatory">
+  {% for column in pipeline_columns %}
+  <div class="flex-shrink-0 w-80 bg-gray-100 rounded-xl p-3 border border-gray-200 snap-center shadow-sm">
+    <div class="flex justify-between items-center mb-3 px-1">
+      <h3 class="font-semibold text-gray-700 text-sm flex items-center gap-2">
+        <span>{{ column.icon }}</span> {{ column.label }}
+      </h3>
+      <span class="bg-white text-gray-600 px-2 py-0.5 rounded-full text-xs font-medium shadow-sm">
+        {{ column.count }}
+      </span>
+    </div>
+
+    <div class="space-y-3 min-h-[50vh]">
+      {% for prospect in column.prospects %}
+      <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:border-indigo-300 hover:shadow-md transition-all">
+        <p class="font-medium text-gray-900 text-sm truncate" title="{{ prospect.name }}">{{ prospect.name }}</p>
+        <p class="text-xs text-gray-500 mt-1 flex gap-2">
+          <span class="truncate">{{ prospect.category }}</span> &middot; 
+          <span class="truncate">{{ prospect.city }}</span>
+        </p>
+        
+        {% if prospect.priority_tier %}
+        <div class="mt-2">
+          <span class="inline-flex text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded
+            {% if prospect.priority_tier == 'HOT' %}bg-red-50 text-red-700
+            {% elif prospect.priority_tier == 'WARM' %}bg-yellow-50 text-yellow-700
+            {% else %}bg-gray-50 text-gray-600{% endif %}">
+            {{ prospect.priority_tier }}
+          </span>
+        </div>
+        {% endif %}
+
+        {% if prospect.next_followup_date %}
+        <p class="text-orange-500 text-[10px] font-semibold mt-2 uppercase tracking-wide">
+          📅 Follow-up: {{ prospect.next_followup_date }}
+        </p>
+        {% endif %}
+
+        <div class="mt-3 pt-2 border-t border-gray-50 text-right">
+          <a href="/prospects/{{ prospect.id }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Lihat Detail &rarr;</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="h-16 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50">
+        <p class="text-xs text-gray-400 font-medium">Kosong</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
